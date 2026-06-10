@@ -1,23 +1,32 @@
 import { httpRequest } from "./httpClient";
 
 export function getShipments() {
-    return httpRequest("/api/shipments", { method: "GET" });
+    return httpRequest("/api/shipments", {
+        method: "GET"
+    });
 }
 
 export function createShipment(data) {
-    return httpRequest("/api/shipments", { 
-        method: "POST", 
-        body: JSON.stringify(data) 
+    return httpRequest("/api/shipments", {
+        method: "POST",
+        body: JSON.stringify(data)
     });
 }
 
-export function updateShipment(id, data) {
-    return httpRequest(`/api/shipments/${id}`, { 
-        method: "PUT", 
-        body: JSON.stringify(data) 
-    });
+export function updateShipmentStatus(trackingCode, status) {
+    return httpRequest(
+        `/api/shipments/${trackingCode}/status?value=${status}`,
+        {
+            method: "PATCH"
+        }
+    );
 }
 
-export function deleteShipment(id) {
-    return httpRequest(`/api/shipments/${id}`, { method: "DELETE" });
+export function deleteShipment(trackingCode) {
+    return httpRequest(
+        `/api/shipments/${trackingCode}`,
+        {
+            method: "DELETE"
+        }
+    );
 }

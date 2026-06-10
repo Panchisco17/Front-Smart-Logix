@@ -1,7 +1,8 @@
 import {
     getShipments,
     createShipment as createShipmentApi,
-    deleteShipment as deleteShipmentApi
+    deleteShipment as deleteShipmentApi,
+    updateShipmentStatus as updateShipmentStatusApi
 } from "../api/shipmentApi";
 
 export async function getShipment() {
@@ -12,6 +13,10 @@ export async function createShipment(shipmentData) {
     return createShipmentApi(shipmentData);
 }
 
-export async function deleteShipment(id) {
-    return deleteShipmentApi(id);
+export async function deleteShipment(trackingCode) {
+    return deleteShipmentApi(trackingCode);
+}
+
+export async function updateShipmentStatus(trackingCode, status) {
+    return updateShipmentStatusApi(trackingCode, status);
 }
