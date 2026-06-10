@@ -1,20 +1,15 @@
-# Usa una imagen ligera de Node.js
-FROM node:18-alpine
-
-# Establece el directorio de trabajo dentro del contenedor
+# ETAPA 1: Construcción (Builder)
+FROM node:20-alpine as builder
 WORKDIR /app
-
-# Copia los archivos de dependencias
 COPY package*.json ./
-
-# Instala las dependencias
+COPY vite.config.js ./
 RUN npm install
-
-# Copia el resto del código fuente del frontend
 COPY . .
+# Se compila el código para producción (Adiós al npm run dev)
+RUN npm run build 
 
-# Expone el puerto por defecto de Vite
-EXPOSE 5173
-
-# Comando para iniciar Vite, permitiendo conexiones externas (--host)
-CMD ["npm", "run", "dev", "--", "--host"]
+# ETAPA 2: Servidor de Producción (Nginx)
+FROM nginx:alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
