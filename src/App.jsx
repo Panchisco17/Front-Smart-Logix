@@ -1,98 +1,46 @@
-import { useEffect, useState } from 'react'
-import './App.css'
+import { useState } from 'react'
 import LoginPage from './pages/Login'
-import { clearLogin, getSaveToken } from './service/authService'
-import ShipmentsPage from './pages/Shipments'
-import OrderPage from './pages/Order'
-import InventoryPage from './pages/Inventory'
-
-const PRIVATE_ROUTER = [
-  { key: "shipment", label: "Envíos", hash: "#/shipment" },
-  { key: "order", label: "Órdenes", hash: "#/order" },
-  { key: "inventory", label: "Inventario", hash: "#/inventory" }
-]
-
-function getRouterFromHash() {
-  return window.location.hash.replace("#/", "")
-}
+import RegisterPage from './pages/Register'
+import { getSaveToken } from './service/authService'
 
 function App() {
+  // Estado para manejar si el usuario ya inició sesión
   const [isLogin, setIsLogin] = useState(Boolean(getSaveToken()))
-  const [current, setCurrent] = useState(getRouterFromHash() || "inventory")
+  
+  // Estado para manejar la vista (Login o Registro)
+  const [isRegistering, setIsRegistering] = useState(false)
 
-  useEffect(() => {
-    function handleHashChange() {
-      const hash = getRouterFromHash();
-      if(hash) setCurrent(hash);
-    }
-    window.addEventListener("hashchange", handleHashChange)
-    handleHashChange()
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange)
-    }
-  }, [])
-
-  function renderPrivate() {
-    if (current === "shipment") {
-      return <ShipmentsPage />
-    }
-
-    if (current === "order") {
-      return <OrderPage />
-    }
-
-    if (current === "inventory") {
-      return <InventoryPage />
-    }
-
-    return <h1>Ruta no encontrada</h1>
-  }
-
-  function handleLoginSucces() {
+  // Función para manejar el éxito del login
+  const handleLoginSucces = () => {
     setIsLogin(true)
   }
 
-  // Tu función para cerrar sesión ya estaba lista
-  function handleLogout() {
-    clearLogin()
-    setIsLogin(false)
-  }
-
+  // Si el usuario ya está autenticado, mostramos el Dashboard
   if (isLogin) {
     return (
-      <div className="dashboard-layout">
-        <aside className="sidebar">
-          <div className="sidebar-header">
-            <h2 className="text-2xl font-bold text-blue-600">Smart Logix</h2>
-            </div>
-          <nav>
-            {PRIVATE_ROUTER.map((route) => (
-              <a
-                key={route.key}
-                href={route.hash}
-                className={`nav-link ${current === route.key ? 'active' : ''}`}
-              >
-                <span>{route.label}</span>
-              </a>
-            ))}
-          </nav>
-          
-          {/* AQUÍ ESTÁ EL BOTÓN DE CERRAR SESIÓN */}
-          <div className="sidebar-footer">
-            <button className="btn-logout" onClick={handleLogout}>
-              Cerrar Sesión
-            </button>
-          </div>
-        </aside>
-
-        <section className="main-content">
-          {renderPrivate()}
-        </section>
+      <div className="p-4">
+        <h1 className="text-2xl font-bold">Bienvenido a Smart Logix</h1>
+        {/* Aquí iría el contenido de tu aplicación privada */}
       </div>
     )
   }
 
-  return <LoginPage handleLoginSucces={handleLoginSucces} />
+  // Si el estado isRegistering es true, mostramos el formulario de registro
+  if (isRegistering) {
+    return (
+      <RegisterPage 
+        onNavigateToLogin={() => setIsRegistering(false)} 
+      />
+    )
+  }
+
+  // Por defecto, mostramos la pantalla de Login
+  return (
+    <LoginPage 
+      handleLoginSucces={handleLoginSucces} 
+      onNavigateToRegister={() => setIsRegistering(true)} 
+    />
+  )
 }
 
 export default App

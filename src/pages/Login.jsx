@@ -1,8 +1,7 @@
 import { useState } from "react"
 import { login, saveLoginSession } from "../service/authService"
 
-function LoginPage({handleLoginSucces}){
-
+function LoginPage({ handleLoginSucces, onNavigateToRegister }) {
     const [credential, setCredential] = useState("")
     const [password, setPassword] = useState("")
     const [message, setMessage] = useState("")
@@ -10,16 +9,10 @@ function LoginPage({handleLoginSucces}){
     async function handleSubmit(event) {
         event.preventDefault()
         setMessage("")
-
         try {
-            const response = await login({
-                credential,
-                password
-            })
-
+            const response = await login({ credential, password })
             saveLoginSession(response)
             handleLoginSucces()
-
         } catch (error) {
             setMessage(error.message)
         }
@@ -54,10 +47,11 @@ function LoginPage({handleLoginSucces}){
                         <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
                             Ingresar
                         </button>
-                        <button type="button" className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300 transition">
+                        <button type="button" onClick={onNavigateToRegister} className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300 transition">
                             Registrarse
                         </button>
                     </div>
+                    {message && <p className="text-red-500 text-sm text-center">{message}</p>}
                 </form>
             </div>
         </div>
