@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { login, saveLoginSession } from "../service/authService"
 
-function LoginPage({ handleLoginSucces, onNavigateToRegister }) {
+function LoginPage({ handleLoginSucces }) {
     const [credential, setCredential] = useState("")
     const [password, setPassword] = useState("")
     const [message, setMessage] = useState("")
@@ -9,49 +9,54 @@ function LoginPage({ handleLoginSucces, onNavigateToRegister }) {
     async function handleSubmit(event) {
         event.preventDefault()
         setMessage("")
+
         try {
-            const response = await login({ credential, password })
+            const response = await login({
+                credential,
+                password
+            })
+
             saveLoginSession(response)
             handleLoginSucces()
+
         } catch (error) {
             setMessage(error.message)
         }
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
-                <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Smart Logix</h2>
-                
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Usuario</label>
+        <div className="flex justify-center items-center h-screen bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Smart Logix</h2>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <label className="text-sm font-medium text-gray-700">
+                        Usuario
                         <input
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
                             onChange={(event) => setCredential(event.target.value)}
                             value={credential}
                         />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+                    </label>
+                    <label className="text-sm font-medium text-gray-700">
+                        Contraseña
                         <input
                             type="password"
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
                             onChange={(event) => setPassword(event.target.value)}
                             value={password}
                         />
-                    </div>
+                    </label>
 
-                    <div className="flex gap-2 pt-4">
-                        <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                    <div className="flex gap-2 mt-2">
+                        <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">
                             Ingresar
                         </button>
-                        <button type="button" onClick={onNavigateToRegister} className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300 transition">
+                        <button type="button" className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded-md transition">
                             Registrarse
                         </button>
                     </div>
-                    {message && <p className="text-red-500 text-sm text-center">{message}</p>}
+
+                    {message && <p className="text-center text-sm text-red-600 bg-red-100 p-2 rounded">{message}</p>}
                 </form>
             </div>
         </div>
