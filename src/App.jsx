@@ -6,12 +6,10 @@ import ShipmentsPage from './pages/Shipments'
 import OrderPage from './pages/Order'
 import InventoryPage from './pages/Inventory'
 
-
-
 const PRIVATE_ROUTER = [
-  { key: "shipment", label: "shipment", hash: "#/shipment" },
-  { key: "order", label: "order", hash: "#/order" },
-  { key: "inventory", label: "inventory", hash: "#/inventory" }
+  { key: "shipment", label: "Envíos", hash: "#/shipment" },
+  { key: "order", label: "Órdenes", hash: "#/order" },
+  { key: "inventory", label: "Inventario", hash: "#/inventory" }
 ]
 
 function getRouterFromHash() {
@@ -20,11 +18,12 @@ function getRouterFromHash() {
 
 function App() {
   const [isLogin, setIsLogin] = useState(Boolean(getSaveToken()))
-  const [current, setCurrent] = useState(getRouterFromHash())
+  const [current, setCurrent] = useState(getRouterFromHash() || "inventory")
 
   useEffect(() => {
     function handleHashChange() {
-      setCurrent(getRouterFromHash())
+      const hash = getRouterFromHash();
+      if(hash) setCurrent(hash);
     }
     window.addEventListener("hashchange", handleHashChange)
     handleHashChange()
@@ -53,6 +52,7 @@ function App() {
     setIsLogin(true)
   }
 
+  // Tu función para cerrar sesión ya estaba lista
   function handleLogout() {
     clearLogin()
     setIsLogin(false)
@@ -60,28 +60,32 @@ function App() {
 
   if (isLogin) {
     return (
-      <div>
-        <aside>
-          <div>
-            <div>
-              <h2>Dashboard</h2>
+      <div className="dashboard-layout">
+        <aside className="sidebar">
+          <div className="sidebar-header">
+            <h2 className="text-2xl font-bold text-blue-600">Smart Logix</h2>
             </div>
-
-            <nav>
-              {PRIVATE_ROUTER.map((route) => (
-                <a
-                  key={route.key}
-                  href={route.hash}
-                >
-                  <span>{route.label}</span>
-                </a>
-              ))}
-            </nav>
-          </div>
+          <nav>
+            {PRIVATE_ROUTER.map((route) => (
+              <a
+                key={route.key}
+                href={route.hash}
+                className={`nav-link ${current === route.key ? 'active' : ''}`}
+              >
+                <span>{route.label}</span>
+              </a>
+            ))}
+          </nav>
           
+          {/* AQUÍ ESTÁ EL BOTÓN DE CERRAR SESIÓN */}
+          <div className="sidebar-footer">
+            <button className="btn-logout" onClick={handleLogout}>
+              Cerrar Sesión
+            </button>
+          </div>
         </aside>
 
-        <section>
+        <section className="main-content">
           {renderPrivate()}
         </section>
       </div>
