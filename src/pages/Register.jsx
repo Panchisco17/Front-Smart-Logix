@@ -1,56 +1,46 @@
+// src/pages/Register.jsx
+import { useState } from "react";
+import { registerRequest } from "../api/authApi";
+
 function RegisterPage({ onNavigateToLogin }) {
+    const [userData, setUserData] = useState({ username: "", email: "", password: "" });
+    const [message, setMessage] = useState("");
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await registerRequest(userData); // Llama a tu API
+            alert("Registro exitoso");
+            onNavigateToLogin(); // Vuelve al login
+        } catch (err) {
+            setMessage("Error: " + (err.message || "No se pudo registrar"));
+        }
+    };
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
-                <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Crear Cuenta</h2>
-                
-                <form className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Nombre de usuario</label>
-                        <input
-                            type="text"
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-                            placeholder="Ej: admin"
-                        />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Correo electrónico</label>
-                        <input
-                            type="email"
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-                            placeholder="correo@ejemplo.com"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Contraseña</label>
-                        <input
-                            type="password"
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-                        />
-                    </div>
-
-                    <div className="pt-4">
-                        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-semibold">
-                            Registrarse
-                        </button>
-                    </div>
-
-                    <p className="text-center text-sm text-gray-600 mt-4">
-                        ¿Ya tienes cuenta?{' '}
-                        <button 
-                            type="button" 
-                            onClick={onNavigateToLogin}
-                            className="text-blue-600 hover:underline font-semibold"
-                        >
-                            Inicia sesión
-                        </button>
-                    </p>
-                </form>
-            </div>
-        </div>
-    )
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <input 
+                onChange={(e) => setUserData({...userData, username: e.target.value})}
+                className="w-full p-2 border rounded" placeholder="Usuario" required 
+            />
+            <input 
+                type="email"
+                onChange={(e) => setUserData({...userData, email: e.target.value})}
+                className="w-full p-2 border rounded" placeholder="Correo" required 
+            />
+            <input 
+                type="password"
+                onChange={(e) => setUserData({...userData, password: e.target.value})}
+                className="w-full p-2 border rounded" placeholder="Contraseña" required 
+            />
+            <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
+                Registrarse
+            </button>
+            <button type="button" onClick={onNavigateToLogin} className="w-full text-blue-600">
+                Volver a Login
+            </button>
+            {message && <p className="text-red-500">{message}</p>}
+        </form>
+    );
 }
-
-export default RegisterPage
+export default RegisterPage;
