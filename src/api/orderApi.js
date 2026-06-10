@@ -1,24 +1,40 @@
-import { httpRequest } from "./httpClient"
+import { httpRequest } from "./httpClient";
 
-// GET /api/orders
-export function getOrdersRequest(authorizationHeader) {
-    return httpRequest("/api/orders", {
-        headers: { Authorization: authorizationHeader }
-    })
+// GET ALL
+export function getOrdersRequest() {
+    return httpRequest("/api/orders");
 }
 
-// POST /api/orders
-export function createOrderRequest(authorizationHeader, orderData) {
+// GET BY NUMBER
+export function getOrderByNumberRequest(orderNumber) {
+    return httpRequest(`/api/orders/${orderNumber}`);
+}
+
+// CREATE
+export function createOrderRequest(orderData) {
     return httpRequest("/api/orders", {
         method: "POST",
-        headers: { Authorization: authorizationHeader },
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify(orderData)
-    })
+    });
 }
 
-// GET /api/orders/{orderNumber}
-export function getOrderByNumberRequest(authorizationHeader, orderNumber) {
-    return httpRequest(`/api/orders/${orderNumber}`, {
-        headers: { Authorization: authorizationHeader }
-    })
+// UPDATE
+export function updateOrderRequest(orderId, orderData) {
+    return httpRequest(`/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(orderData)
+    });
+}
+
+// DELETE
+export function deleteOrderRequest(id) {
+    return httpRequest(`/api/orders/${id}`, {
+        method: "DELETE"
+    });
 }

@@ -1,28 +1,46 @@
-import { getOrdersRequest, createOrderRequest, getOrderByNumberRequest } from "../api/orderApi"
-import { getRequiredAuthorizationHeader } from "./authService"
+import {
+    getOrdersRequest,
+    getOrderByNumberRequest,
+    createOrderRequest,
+    updateOrderRequest,
+    deleteOrderRequest
+} from "../api/orderApi";
 
+import { getRequiredAuthorizationHeader } from "./authService";
+
+// GET ALL
 export async function getOrders() {
-    // El service valida sesión antes de pedir datos al backend.
-    const authorizationHeader = getRequiredAuthorizationHeader()
-    return getOrdersRequest(authorizationHeader)
+    return getOrdersRequest();
 }
 
-export async function createOrder(orderData) {
-    // Validación de negocio: una orden necesita al menos el email del cliente y un arreglo de ítems
-    if (!orderData.customerEmail || !orderData.items || orderData.items.length === 0) {
-        throw new Error("La orden debe tener un email de cliente y al menos un producto")
-    }
-
-    const authorizationHeader = getRequiredAuthorizationHeader()
-    return createOrderRequest(authorizationHeader, orderData)
-}
-
+// GET BY NUMBER
 export async function getOrderByNumber(orderNumber) {
-    // Evita hacer la petición si el número de orden viene vacío
-    if (!orderNumber) {
-        throw new Error("El número de orden es obligatorio para la búsqueda")
+    if (!orderNumber) throw new Error("Order number requerido");
+    return getOrderByNumberRequest(orderNumber);
+}
+
+// CREATE
+export async function createOrder(orderData) {
+    if (
+        !orderData.customerName ||
+        !orderData.customerEmail ||
+        !orderData.shippingAddress ||
+        !orderData.lines?.length
+    ) {
+        throw new Error("Order inválida");
     }
 
-    const authorizationHeader = getRequiredAuthorizationHeader()
-    return getOrderByNumberRequest(authorizationHeader, orderNumber)
+    return createOrderRequest(orderData);
+}
+
+// UPDATE
+export async function updateOrder(orderId, orderData) {
+    if (!orderId) throw new Error("Order ID requerido");
+    return updateOrderRequest(orderId, orderData);
+}
+
+// DELETE
+export async function deleteOrder(orderId) {
+    if (!orderId) throw new Error("Order ID requerido");
+    return deleteOrderRequest(orderId);
 }
