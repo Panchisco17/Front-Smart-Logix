@@ -83,88 +83,127 @@ function InventoryPage() {
                     Agregar Producto
                 </h3>
 
-                <form
-                    onSubmit={handleCreateItem}
-                    className="grid md:grid-cols-5 gap-3"
-                >
-                    <input
-                        type="text"
-                        placeholder="SKU"
-                        value={newItem.sku}
-                        onChange={(e) =>
-                            setNewItem({
-                                ...newItem,
-                                sku: e.target.value
-                            })
-                        }
-                        className="p-2 border rounded"
-                        required
-                    />
+                <form onSubmit={handleCreateItem}>
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="bg-gray-100">
+                                <th className="p-2 text-left">
+                                    SKU
+                                </th>
 
-                    <input
-                        type="text"
-                        placeholder="Producto"
-                        value={newItem.productName}
-                        onChange={(e) =>
-                            setNewItem({
-                                ...newItem,
-                                productName: e.target.value
-                            })
-                        }
-                        className="p-2 border rounded"
-                        required
-                    />
+                                <th className="p-2 text-left">
+                                    Producto
+                                </th>
 
-                    <input
-                        type="text"
-                        placeholder="Bodega"
-                        value={newItem.warehouseCode}
-                        onChange={(e) =>
-                            setNewItem({
-                                ...newItem,
-                                warehouseCode: e.target.value
-                            })
-                        }
-                        className="p-2 border rounded"
-                        required
-                    />
+                                <th className="p-2 text-left">
+                                    Bodega
+                                </th>
 
-                    <input
-                        type="number"
-                        min="0"
-                        placeholder="Cantidad"
-                        value={newItem.initialQuantity}
-                        onChange={(e) =>
-                            setNewItem({
-                                ...newItem,
-                                initialQuantity: Number(e.target.value)
-                            })
-                        }
-                        className="p-2 border rounded"
-                        required
-                    />
+                                <th className="p-2 text-left">
+                                    Cantidad
+                                </th>
 
-                    <input
-                        type="number"
-                        min="0"
-                        placeholder="Nivel Reorden"
-                        value={newItem.reorderLevel}
-                        onChange={(e) =>
-                            setNewItem({
-                                ...newItem,
-                                reorderLevel: Number(e.target.value)
-                            })
-                        }
-                        className="p-2 border rounded"
-                        required
-                    />
+                                <th className="p-2 text-left">
+                                    Reorden
+                                </th>
 
-                    <button
-                        type="submit"
-                        className="md:col-span-5 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded transition"
-                    >
-                        Agregar Producto
-                    </button>
+                               
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td className="p-2">
+                                    <input
+                                        type="text"
+                                        value={newItem.sku}
+                                        onChange={(e) =>
+                                            setNewItem({
+                                                ...newItem,
+                                                sku: e.target.value
+                                            })
+                                        }
+                                        className="w-full p-2 border rounded"
+                                        required
+                                    />
+                                </td>
+
+                                <td className="p-2">
+                                    <input
+                                        type="text"
+                                        value={newItem.productName}
+                                        onChange={(e) =>
+                                            setNewItem({
+                                                ...newItem,
+                                                productName: e.target.value
+                                            })
+                                        }
+                                        className="w-full p-2 border rounded"
+                                        required
+                                    />
+                                </td>
+
+                                <td className="p-2">
+                                    <input
+                                        type="text"
+                                        value={newItem.warehouseCode}
+                                        onChange={(e) =>
+                                            setNewItem({
+                                                ...newItem,
+                                                warehouseCode:
+                                                    e.target.value
+                                            })
+                                        }
+                                        className="w-full p-2 border rounded"
+                                        required
+                                    />
+                                </td>
+
+                                <td className="p-2">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={newItem.initialQuantity}
+                                        onChange={(e) =>
+                                            setNewItem({
+                                                ...newItem,
+                                                initialQuantity:
+                                                    Number(e.target.value)
+                                            })
+                                        }
+                                        className="w-full p-2 border rounded"
+                                        required
+                                    />
+                                </td>
+
+                                <td className="p-2">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={newItem.reorderLevel}
+                                        onChange={(e) =>
+                                            setNewItem({
+                                                ...newItem,
+                                                reorderLevel:
+                                                    Number(e.target.value)
+                                            })
+                                        }
+                                        className="w-full p-2 border rounded"
+                                        required
+                                    />
+                                </td>
+
+                                <td className="p-2">
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
+                                    >
+                                        Agregar
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </form>
             </div>
 
@@ -185,13 +224,33 @@ function InventoryPage() {
 
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="px-6 py-4">SKU</th>
-                            <th className="px-6 py-4">Producto</th>
-                            <th className="px-6 py-4">Bodega</th>
-                            <th className="px-6 py-4">Cantidad</th>
-                            <th className="px-6 py-4">Reservado</th>
-                            <th className="px-6 py-4">Reorden</th>
-                            <th className="px-6 py-4">Última Actualización</th>
+                            <th className="px-6 py-4">
+                                SKU
+                            </th>
+
+                            <th className="px-6 py-4">
+                                Producto
+                            </th>
+
+                            <th className="px-6 py-4">
+                                Bodega
+                            </th>
+
+                            <th className="px-6 py-4">
+                                Cantidad
+                            </th>
+
+                            <th className="px-6 py-4">
+                                Reservado
+                            </th>
+
+                            <th className="px-6 py-4">
+                                Reorden
+                            </th>
+
+                            <th className="px-6 py-4">
+                                Última Actualización
+                            </th>
                         </tr>
                     </thead>
 
