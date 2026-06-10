@@ -38,7 +38,6 @@ function App() {
     return <h1 className="text-xl text-gray-500">Ruta no encontrada</h1>
   }
 
-  // LÓGICA DE VISTAS PÚBLICAS (LOGIN / REGISTRO)
   if (!isLogin) {
     if (isRegistering) {
       return <RegisterPage onNavigateToLogin={() => setIsRegistering(false)} />
@@ -51,7 +50,6 @@ function App() {
     )
   }
 
-  // LÓGICA DEL DASHBOARD (PRIVADO)
   const currentLabel = PRIVATE_ROUTER.find(r => r.key === current)?.label || current;
 
   return (

@@ -48,10 +48,15 @@ function LoginPage({ handleLoginSucces, onNavigateToRegister }) {
                     </label>
 
                     <div className="flex gap-2 mt-2">
-                        <button type="submit" className="...">Ingresar</button>
-                        <button 
-                            type="button" 
-                            onClick={onNavigateToRegister} // AQUÍ CONECTAS LA FUNCIÓN
+                        <button
+                            type="submit"
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition"
+                        >
+                            Ingresar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onNavigateToRegister}
                             className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded-md transition"
                         >
                             Registrarse

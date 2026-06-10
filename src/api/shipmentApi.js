@@ -1,10 +1,23 @@
-import { httpRequest } from "./httpClient"
+import { httpRequest } from "./httpClient";
 
-// El API mantiene aislada la ruta del recurso de envios.
-export function getShipmentRequest(authorizationHeader) {
-    return httpRequest("/api/shipments", {
-        headers: {
-            Authorization: authorizationHeader
-        }
-    })
+export function getShipments() {
+    return httpRequest("/api/shipments", { method: "GET" });
+}
+
+export function createShipment(data) {
+    return httpRequest("/api/shipments", { 
+        method: "POST", 
+        body: JSON.stringify(data) 
+    });
+}
+
+export function updateShipment(id, data) {
+    return httpRequest(`/api/shipments/${id}`, { 
+        method: "PUT", 
+        body: JSON.stringify(data) 
+    });
+}
+
+export function deleteShipment(id) {
+    return httpRequest(`/api/shipments/${id}`, { method: "DELETE" });
 }
