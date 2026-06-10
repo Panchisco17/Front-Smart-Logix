@@ -71,8 +71,6 @@ export default function Order() {
         
         const firstLine = order.lines && order.lines[0] ? order.lines[0] : {};
 
-        // Como el backend no devuelve los datos del cliente, los dejamos en blanco para que 
-        // se puedan volver a ingresar si se está actualizando la orden.
         setForm({
             customerName: '',
             customerEmail: '',
