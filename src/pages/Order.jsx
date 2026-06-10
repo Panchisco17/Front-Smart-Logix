@@ -209,7 +209,6 @@ export default function Order() {
                         <tr>
                             <th className="px-6 py-3">Nº Orden</th>
                             <th className="px-6 py-3">Total</th>
-                            <th className="px-6 py-3 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -230,18 +229,7 @@ export default function Order() {
                                     <td className="px-6 py-4 font-semibold text-gray-800">
                                         ${order.totalAmount?.toLocaleString('es-CL') || order.totalAmount}
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                            order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                                            order.status === 'FAILED' ? 'bg-red-100 text-red-800' :
-                                            'bg-yellow-100 text-yellow-800'
-                                        }`}>
-                                            {order.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-xs max-w-xs truncate text-gray-600" title={order.reason}>
-                                        {order.trackingCode ? `📦 ${order.trackingCode}` : (order.reason || 'Sin observaciones')}
-                                    </td>
+                                    
                                     <td className="px-6 py-4 text-center whitespace-nowrap">
                                         <div className="flex gap-2 justify-center">
                                             <button 
