@@ -1,23 +1,17 @@
-import { useEffect, useState } from "react";
-import {
-    getOrders,
-    createOrder,
-    updateOrder,
-    deleteOrder
-} from "../service/orderService";
+import React, { useState, useEffect } from 'react';
+import { getOrders, createOrder, updateOrder, deleteOrder } from '../service/orderService';
 
-function OrderPage() {
+export default function Order() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [message, setMessage] = useState("");
-    const [editingId, setEditingId] = useState(null);
+    const [error, setError] = useState(null);
+    const [editingNumber, setEditingNumber] = useState(null);
 
     const [form, setForm] = useState({
-        customerName: "",
-        customerEmail: "",
-        shippingAddress: "",
-        sku: "",
+        customerName: '',
+        customerEmail: '',
+        shippingAddress: '',
+        sku: '',
         quantity: 1,
         unitPrice: 0
     });
@@ -26,43 +20,24 @@ function OrderPage() {
         loadOrders();
     }, []);
 
-    async function loadOrders() {
-        setLoading(true);
-        setError("");
-
+    const loadOrders = async () => {
         try {
+            setLoading(true);
             const response = await getOrders();
-
-            console.log("RAW ORDERS RESPONSE:", response);
-
-            const data =
-                response?.data ??
-                response?.content ??
-                response;
-
-            setOrders(Array.isArray(data) ? data : []);
-
+            setOrders(Array.isArray(response) ? response : []);
+            setError(null);
         } catch (err) {
-            setError("Error al cargar órdenes");
+            console.error("Error al cargar órdenes:", err);
+            setError("No se pudieron cargar las órdenes del servidor.");
         } finally {
             setLoading(false);
         }
-    }
+    };
 
-    function resetForm() {
-        setForm({
-            customerName: "",
-            customerEmail: "",
-            shippingAddress: "",
-            sku: "",
-            quantity: 1,
-            unitPrice: 0
-        });
-        setEditingId(null);
-    }
-
-    function buildOrderPayload() {
-        return {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        const payload = {
             customerName: form.customerName.trim(),
             customerEmail: form.customerEmail.trim(),
             shippingAddress: form.shippingAddress.trim(),
@@ -74,285 +49,221 @@ function OrderPage() {
                 }
             ]
         };
-    }
-
-    async function handleSubmit(e) {
-        e.preventDefault();
-
-        const data = buildOrderPayload();
-
-        if (
-            !data.customerName ||
-            !data.customerEmail ||
-            !data.shippingAddress ||
-            !data.lines[0].sku ||
-            data.lines[0].quantity < 1 ||
-            !data.lines[0].unitPrice
-        ) {
-            setError("Completa todos los campos correctamente");
-            return;
-        }
 
         try {
-            if (editingId) {
-                await updateOrder(editingId, data);
-                setMessage("Orden actualizada correctamente");
+            if (editingNumber) {
+                await updateOrder(editingNumber, payload);
+                alert("Orden actualizada con éxito");
             } else {
-                await createOrder(data);
-                setMessage("Orden creada correctamente");
+                await createOrder(payload);
+                alert("Orden creada con éxito");
             }
-
             resetForm();
-            await loadOrders();
-            setError("");
-
+            loadOrders();
         } catch (err) {
-            setError(err.message || "Error al guardar orden");
+            console.error("Error al guardar la orden:", err);
+            alert("Error al guardar la orden. Revisa la consola.");
         }
-    }
+    };
 
-    async function handleDelete(order) {
-        if (!confirm("¿Eliminar esta orden?")) return;
+    const handleEdit = (order) => {
+        setEditingNumber(order.orderNumber);
+        
+        const firstLine = order.lines && order.lines[0] ? order.lines[0] : {};
 
-        try {
-            const id = order.orderNumber || order.id;
-            await deleteOrder(id);
-
-            setMessage("Orden eliminada correctamente");
-            await loadOrders();
-
-        } catch (err) {
-            setError("Error al eliminar orden");
-        }
-    }
-
-    function handleEdit(order) {
-        setEditingId(order.id);
-
-        const line = order.lines?.[0];
-
+        // Como el backend no devuelve los datos del cliente, los dejamos en blanco para que 
+        // se puedan volver a ingresar si se está actualizando la orden.
         setForm({
-            customerName: order.customerName || "",
-            customerEmail: order.customerEmail || "",
-            shippingAddress: order.shippingAddress || "",
-            sku: line?.sku || "",
-            quantity: line?.quantity || 1,
-            unitPrice: line?.unitPrice || 0
+            customerName: '',
+            customerEmail: '',
+            shippingAddress: '',
+            sku: firstLine.sku || '',
+            quantity: firstLine.quantity || 1,
+            unitPrice: firstLine.unitPrice || 0
         });
-    }
+    };
 
-    if (loading) {
-        return (
-            <div className="text-center py-10 text-gray-600">
-                Cargando órdenes...
-            </div>
-        );
-    }
+    const handleDeleteOrder = async (order) => {
+        if (!window.confirm(`¿Estás seguro de eliminar la orden ${order.orderNumber}?`)) return;
+        try {
+            await deleteOrder(order.orderNumber);
+            alert("Orden eliminada con éxito");
+            loadOrders();
+        } catch (err) {
+            console.error("Error al eliminar orden:", err);
+            alert("Error al eliminar orden.");
+        }
+    };
+
+    const resetForm = () => {
+        setEditingNumber(null);
+        setForm({
+            customerName: '',
+            customerEmail: '',
+            shippingAddress: '',
+            sku: '',
+            quantity: 1,
+            unitPrice: 0
+        });
+    };
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-
-            <h2 className="text-xl font-bold mb-6 text-gray-800">
-                Gestión de Órdenes
-            </h2>
-
-            {/* FORM */}
-            <div className="bg-gray-50 p-4 rounded-lg border mb-6">
-                <h3 className="font-semibold text-gray-700 mb-4">
-                    {editingId ? "Editar Orden" : "Crear Orden"}
-                </h3>
-
-                <form onSubmit={handleSubmit}>
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="p-2 text-left">Nombre</th>
-                                <th className="p-2 text-left">Email</th>
-                                <th className="p-2 text-left">Dirección</th>
-                                <th className="p-2 text-left">SKU</th>
-                                <th className="p-2 text-left">Cantidad</th>
-                                <th className="p-2 text-left">Precio</th>
-                                <th className="p-2 text-left">Acción</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr>
-                                <td className="p-2">
-                                    <input
-                                        value={form.customerName}
-                                        onChange={(e) =>
-                                            setForm({ ...form, customerName: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </td>
-
-                                <td className="p-2">
-                                    <input
-                                        value={form.customerEmail}
-                                        onChange={(e) =>
-                                            setForm({ ...form, customerEmail: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </td>
-
-                                <td className="p-2">
-                                    <input
-                                        value={form.shippingAddress}
-                                        onChange={(e) =>
-                                            setForm({ ...form, shippingAddress: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </td>
-
-                                <td className="p-2">
-                                    <input
-                                        value={form.sku}
-                                        onChange={(e) =>
-                                            setForm({ ...form, sku: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </td>
-
-                                <td className="p-2">
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={form.quantity}
-                                        onChange={(e) =>
-                                            setForm({ ...form, quantity: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </td>
-
-                                <td className="p-2">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={form.unitPrice}
-                                        onChange={(e) =>
-                                            setForm({ ...form, unitPrice: e.target.value })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </td>
-
-                                <td className="p-2 flex gap-2">
-                                    <button
-                                        type="submit"
-                                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                                    >
-                                        {editingId ? "Actualizar" : "Agregar"}
-                                    </button>
-
-                                    {editingId && (
-                                        <button
-                                            type="button"
-                                            onClick={resetForm}
-                                            className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
-                                        >
-                                            Cancelar
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-
-            {/* MESSAGES */}
-            {message && (
-                <div className="mb-4 p-3 rounded bg-green-100 text-green-700">
-                    {message}
+        <div className="p-6 max-w-7xl mx-auto">
+            <h1 className="text-2xl font-bold mb-6 text-gray-800">Gestión de Órdenes</h1>
+            
+            {/* Formulario de Registro / Edición */}
+            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm mb-8 border border-gray-200">
+                <h2 className="text-lg font-semibold mb-4 text-gray-700">
+                    {editingNumber ? `Editar Orden: ${editingNumber}` : 'Crear Nueva Orden'}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">Nombre Cliente</label>
+                        <input 
+                            type="text" 
+                            className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
+                            value={form.customerName}
+                            onChange={e => setForm({...form, customerName: e.target.value})}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">Email Cliente</label>
+                        <input 
+                            type="email" 
+                            className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
+                            value={form.customerEmail}
+                            onChange={e => setForm({...form, customerEmail: e.target.value})}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">Dirección de Envío</label>
+                        <input 
+                            type="text" 
+                            className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
+                            value={form.shippingAddress}
+                            onChange={e => setForm({...form, shippingAddress: e.target.value})}
+                            required
+                        />
+                    </div>
                 </div>
-            )}
 
-            {error && (
-                <div className="mb-4 p-3 rounded bg-red-100 text-red-700">
-                    {error}
+                <div className="border-t pt-4 mt-4">
+                    <h3 className="text-md font-medium mb-3 text-gray-700">Detalle del Producto</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-1">SKU</label>
+                            <input 
+                                type="text" 
+                                className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
+                                value={form.sku}
+                                onChange={e => setForm({...form, sku: e.target.value})}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-1">Cantidad</label>
+                            <input 
+                                type="number" 
+                                className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
+                                value={form.quantity}
+                                onChange={e => setForm({...form, quantity: e.target.value})}
+                                min="1"
+                                required
+                        />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-1">Precio Unitario</label>
+                            <input 
+                                type="number" 
+                                className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
+                                value={form.unitPrice}
+                                onChange={e => setForm({...form, unitPrice: e.target.value})}
+                                min="0"
+                                required
+                            />
+                        </div>
+                    </div>
                 </div>
-            )}
 
-            {/* TABLE */}
-            <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-gray-600">
+                <div className="mt-6 flex gap-2 justify-end">
+                    {editingNumber && (
+                        <button type="button" onClick={resetForm} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition">
+                            Cancelar
+                        </button>
+                    )}
+                    <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition">
+                        {editingNumber ? 'Actualizar Orden' : 'Crear Orden'}
+                    </button>
+                </div>
+            </form>
 
-                    <thead className="text-xs uppercase bg-gray-50 border-b border-gray-200">
+            {/* Alerta de Error */}
+            {error && <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">{error}</div>}
+
+            {/* Tabla de Órdenes Simplificada */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+                <table className="w-full text-sm text-left text-gray-500">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b">
                         <tr>
-                            <th className="px-6 py-4">ID</th>
-                            <th className="px-6 py-4">Nombre</th>
-                            <th className="px-6 py-4">Email</th>
-                            <th className="px-6 py-4">Dirección</th>
-                            <th className="px-6 py-4">Productos</th>
-                            <th className="px-6 py-4">Acciones</th>
+                            <th className="px-6 py-3">Nº Orden</th>
+                            <th className="px-6 py-3">Total</th>
+                            <th className="px-6 py-3 text-center">Acciones</th>
                         </tr>
                     </thead>
-
                     <tbody className="divide-y divide-gray-100">
-                        {orders.length === 0 ? (
+                        {loading ? (
                             <tr>
-                                <td colSpan="6" className="text-center py-6 text-gray-500">
-                                    No existen órdenes registradas.
-                                </td>
+                                <td colSpan="5" className="text-center py-8 text-gray-400">Cargando datos del sistema...</td>
+                            </tr>
+                        ) : orders.length === 0 ? (
+                            <tr>
+                                <td colSpan="5" className="text-center py-8 text-gray-400">No se encontraron registros de órdenes.</td>
                             </tr>
                         ) : (
-                            orders.map(order => (
-                                <tr key={order.id} className="bg-white hover:bg-gray-50">
-
-                                    <td className="px-6 py-4 font-medium text-gray-900">
-                                        {order.id}
+                            orders.map((order) => (
+                                <tr key={order.orderNumber} className="bg-white hover:bg-gray-50 transition">
+                                    <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                                        {order.orderNumber}
                                     </td>
-
+                                    <td className="px-6 py-4 font-semibold text-gray-800">
+                                        ${order.totalAmount?.toLocaleString('es-CL') || order.totalAmount}
+                                    </td>
                                     <td className="px-6 py-4">
-                                        {order.customerName}
+                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                            order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
+                                            order.status === 'FAILED' ? 'bg-red-100 text-red-800' :
+                                            'bg-yellow-100 text-yellow-800'
+                                        }`}>
+                                            {order.status}
+                                        </span>
                                     </td>
-
-                                    <td className="px-6 py-4">
-                                        {order.customerEmail}
+                                    <td className="px-6 py-4 text-xs max-w-xs truncate text-gray-600" title={order.reason}>
+                                        {order.trackingCode ? `📦 ${order.trackingCode}` : (order.reason || 'Sin observaciones')}
                                     </td>
-
-                                    <td className="px-6 py-4">
-                                        {order.shippingAddress}
+                                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                                        <div className="flex gap-2 justify-center">
+                                            <button 
+                                                onClick={() => handleEdit(order)} 
+                                                className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded hover:bg-amber-100 transition text-xs"
+                                            >
+                                                Editar
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDeleteOrder(order)} 
+                                                className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 transition text-xs"
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </div>
                                     </td>
-
-                                    <td className="px-6 py-4">
-                                        {order.lines?.map(l =>
-                                            `${l.sku} (${l.quantity})`
-                                        ).join(", ")}
-                                    </td>
-
-                                    <td className="px-6 py-4 flex gap-2">
-                                        <button
-                                            onClick={() => handleEdit(order)}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                                        >
-                                            Editar
-                                        </button>
-
-                                        <button
-                                            onClick={() => handleDelete(order)}
-                                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                                        >
-                                            Eliminar
-                                        </button>
-                                    </td>
-
                                 </tr>
                             ))
                         )}
                     </tbody>
-
                 </table>
             </div>
-
         </div>
     );
 }
-
-export default OrderPage;

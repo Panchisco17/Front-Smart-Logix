@@ -1,46 +1,27 @@
-import {
-    getOrdersRequest,
-    getOrderByNumberRequest,
-    createOrderRequest,
-    updateOrderRequest,
-    deleteOrderRequest
-} from "../api/orderApi";
+import { httpRequest } from "../api/httpClient";
 
-import { getRequiredAuthorizationHeader } from "./authService";
-
-// GET ALL
 export async function getOrders() {
-    return getOrdersRequest();
+    return httpRequest("/api/orders", { method: "GET" });
 }
 
-// GET BY NUMBER
-export async function getOrderByNumber(orderNumber) {
-    if (!orderNumber) throw new Error("Order number requerido");
-    return getOrderByNumberRequest(orderNumber);
-}
-
-// CREATE
 export async function createOrder(orderData) {
-    if (
-        !orderData.customerName ||
-        !orderData.customerEmail ||
-        !orderData.shippingAddress ||
-        !orderData.lines?.length
-    ) {
-        throw new Error("Order inválida");
-    }
-
-    return createOrderRequest(orderData);
+    return httpRequest("/api/orders", {
+        method: "POST",
+        body: JSON.stringify(orderData),
+    });
 }
 
-// UPDATE
-export async function updateOrder(orderId, orderData) {
-    if (!orderId) throw new Error("Order ID requerido");
-    return updateOrderRequest(orderId, orderData);
+export async function updateOrder(orderNumber, orderData) {
+    if (!orderNumber) throw new Error("Order Number requerido para actualizar");
+    return httpRequest(`/api/orders/${orderNumber}`, {
+        method: "PUT",
+        body: JSON.stringify(orderData),
+    });
 }
 
-// DELETE
-export async function deleteOrder(orderId) {
-    if (!orderId) throw new Error("Order ID requerido");
-    return deleteOrderRequest(orderId);
+export async function deleteOrder(orderNumber) {
+    if (!orderNumber) throw new Error("Order Number requerido para eliminar");
+    return httpRequest(`/api/orders/${orderNumber}`, {
+        method: "DELETE",
+    });
 }
