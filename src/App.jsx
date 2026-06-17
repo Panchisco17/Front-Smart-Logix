@@ -1,61 +1,77 @@
 import { useEffect, useState } from 'react'
 import LoginPage from './pages/Login'
 import RegisterPage from './pages/Register'
-// 1. Importamos getSaveUser para leer los datos del usuario logueado
 import { clearLogin, getSaveToken, getSaveUser } from './service/authService'
 import ShipmentsPage from './pages/Shipments'
 import OrderPage from './pages/Order'
 import InventoryPage from './pages/Inventory'
+import UsersPage from './pages/Users'
+import ProductsPage from './pages/Products'
 
 const PRIVATE_ROUTER = [
-  { key: "shipment", label: "Envíos", hash: "#/shipment" },
-  { key: "order", label: "Órdenes", hash: "#/order" },
-  { key: "inventory", label: "Inventario", hash: "#/inventory" }
+  { key: "products", label: "Tienda", hash: "#/products", allowedRoles: ["ROLE_USER", "ROLE_ADMIN"] },
+  
+  { key: "inventory", label: "Inventario", hash: "#/inventory", allowedRoles: ["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"] },
+  { key: "order", label: "Órdenes", hash: "#/order", allowedRoles: ["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"] },
+  { key: "shipment", label: "Envíos", hash: "#/shipment", allowedRoles: ["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"] },
+  { key: "users", label: "Usuarios", hash: "#/users", allowedRoles: ["ROLE_ADMIN"] }
 ]
 
 function getRouterFromHash() {
   return window.location.hash.replace("#/", "")
 }
 
-// 2. Creamos un diccionario para traducir los roles técnicos a nombres amigables
 const ROLE_NAMES = {
   "ROLE_ADMIN": "Administrador",
-  "ROLE_WAREHOUSE_MANAGER": "Jefe de Bodega",
-  "ROLE_USER": "Usuario"
+  "ROLE_WAREHOUSE_MANAGER": "Bodeguero",
+  "ROLE_USER": "Cliente" 
 };
 
-// 3. Asignamos colores distintos según el rol para que destaque visualmente
 const ROLE_COLORS = {
   "ROLE_ADMIN": "bg-purple-600",
   "ROLE_WAREHOUSE_MANAGER": "bg-yellow-600",
-  "ROLE_USER": "bg-blue-600"
+  "ROLE_USER": "bg-green-600" 
 };
 
 function App() {
   const [isLogin, setIsLogin] = useState(Boolean(getSaveToken()))
   const [isRegistering, setIsRegistering] = useState(false)
-  const [current, setCurrent] = useState(getRouterFromHash() || "inventory")
-
-  // Obtenemos los datos del usuario actual para pintarlos en la vista
+  
   const currentUser = getSaveUser();
   const displayRole = currentUser ? (ROLE_NAMES[currentUser.role] || currentUser.role) : "";
   const roleColor = currentUser ? (ROLE_COLORS[currentUser.role] || "bg-gray-500") : "bg-gray-500";
 
+  const authorizedRoutes = PRIVATE_ROUTER.filter(route => 
+    currentUser && route.allowedRoles.includes(currentUser.role)
+  );
+
+  const initialHash = getRouterFromHash();
+  const isValidHash = authorizedRoutes.some(r => r.key === initialHash);
+  const defaultRoute = authorizedRoutes.length > 0 ? authorizedRoutes[0].key : "products";
+
+  const [current, setCurrent] = useState(isValidHash ? initialHash : defaultRoute);
+
   useEffect(() => {
     function handleHashChange() {
       const hash = getRouterFromHash();
-      if (hash) setCurrent(hash);
+      if (hash && authorizedRoutes.some(r => r.key === hash)) {
+        setCurrent(hash);
+      } else if (hash) {
+         window.location.hash = `#/${defaultRoute}`;
+      }
     }
     window.addEventListener("hashchange", handleHashChange)
     handleHashChange()
     return () => window.removeEventListener("hashchange", handleHashChange)
-  }, [])
+  }, [authorizedRoutes, defaultRoute])
 
   function renderPrivate() {
+    if (current === "products") return <ProductsPage />
     if (current === "shipment") return <ShipmentsPage />
     if (current === "order") return <OrderPage />
     if (current === "inventory") return <InventoryPage />
-    return <h1 className="text-xl text-gray-500">Ruta no encontrada</h1>
+    if (current === "users") return <UsersPage />
+    return <h1 className="text-xl text-gray-500">Cargando interfaz...</h1>
   }
 
   if (!isLogin) {
@@ -78,12 +94,12 @@ function App() {
         <div className="p-6 text-2xl font-bold text-blue-400">Smart Logix</div>
         
         <nav className="flex-1 mt-4">
-          {PRIVATE_ROUTER.map((route) => (
+          {authorizedRoutes.map((route) => (
             <a
               key={route.key}
               href={route.hash}
               className={`block px-6 py-3 transition-colors ${
-                current === route.key ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                current === route.key ? 'bg-blue-600 text-white border-l-4 border-blue-300' : 'text-gray-400 hover:bg-gray-700 hover:text-white border-l-4 border-transparent'
               }`}
             >
               {route.label}
@@ -91,10 +107,9 @@ function App() {
           ))}
         </nav>
 
-        {/* --- NUEVA SECCIÓN DE PERFIL DE USUARIO --- */}
         <div className="p-6 border-t border-gray-700 bg-gray-900">
           <div className="mb-4">
-            <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Logueado como</p>
+            <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Conectado como</p>
             <p className="font-bold text-white truncate text-lg" title={currentUser?.username}>
               {currentUser?.username || "Usuario"}
             </p>
@@ -112,15 +127,14 @@ function App() {
             Cerrar Sesión
           </button>
         </div>
-        {/* ------------------------------------------ */}
 
       </aside>
 
-      <section className="flex-1 p-8">
-        <header className="mb-6">
+      <section className="flex-1 p-8 overflow-y-auto">
+        <header className="mb-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-800">{currentLabel}</h1>
         </header>
-        <main className="bg-white p-6 rounded-lg shadow-sm">
+        <main className="bg-transparent rounded-lg">
           {renderPrivate()}
         </main>
       </section>

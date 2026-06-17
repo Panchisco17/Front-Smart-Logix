@@ -1,0 +1,193 @@
+import { useEffect, useState } from "react";
+import { getInventory } from "../service/inventoryService";
+import { getSaveUser } from "../service/authService";
+
+function ProductsPage() {
+    const [products, setProducts] = useState([]);
+    const [cart, setCart] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
+
+    const currentUser = getSaveUser();
+
+    useEffect(() => {
+        loadProducts();
+    }, []);
+
+    async function loadProducts() {
+        setLoading(true);
+        try {
+            const response = await getInventory();
+            const availableProducts = response.filter(item => item.availableQuantity > 0);
+            setProducts(availableProducts);
+        } catch (err) {
+            setError("Error al cargar los productos disponibles.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    function handleAddToCart(product) {
+        setCart((prevCart) => {
+            const existingItem = prevCart.find((item) => item.sku === product.sku);
+            
+            if (existingItem) {
+                if (existingItem.quantity + 1 > product.availableQuantity) {
+                    alert("No puedes agregar más de la cantidad disponible en stock.");
+                    return prevCart;
+                }
+                return prevCart.map((item) =>
+                    item.sku === product.sku ? { ...item, quantity: item.quantity + 1 } : item
+                );
+            } else {
+                return [...prevCart, { ...product, quantity: 1 }];
+            }
+        });
+    }
+
+    function handleRemoveFromCart(sku) {
+        setCart((prevCart) => {
+            const existingItem = prevCart.find((item) => item.sku === sku);
+            if (existingItem.quantity === 1) {
+                return prevCart.filter((item) => item.sku !== sku);
+            } else {
+                return prevCart.map((item) =>
+                    item.sku === sku ? { ...item, quantity: item.quantity - 1 } : item
+                );
+            }
+        });
+    }
+
+    // 1. CALCULAMOS SUBTOTAL, COSTO DE ENVÍO Y TOTAL
+    const cartSubtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    // Si el subtotal es mayor a 50000, el envío es 0. Si no, es 5000.
+    const shippingCost = cartSubtotal > 50000 ? 0 : 5000;
+    const cartTotal = cartSubtotal + shippingCost;
+
+    async function handleCheckout() {
+        if (cart.length === 0) return;
+        try {
+            setLoading(true);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setMessage("¡Pedido realizado con éxito!");
+            setCart([]); 
+            await loadProducts(); 
+            setTimeout(() => setMessage(""), 3000);
+        } catch (err) {
+            setError("Hubo un problema al procesar el pedido.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    if (loading && products.length === 0) {
+        return <div className="text-center py-10 text-gray-600">Cargando catálogo...</div>;
+    }
+
+    return (
+        <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 className="text-xl font-bold mb-6 text-gray-800">Catálogo de Productos</h2>
+
+                {error && <div className="mb-4 p-3 rounded bg-red-100 text-red-700">{error}</div>}
+                {message && <div className="mb-4 p-3 rounded bg-green-100 text-green-700">{message}</div>}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {products.length === 0 ? (
+                        <p className="text-gray-500 col-span-full">No hay productos disponibles en este momento.</p>
+                    ) : (
+                        products.map((item) => (
+                            <div key={item.sku} className="border border-gray-200 rounded-lg p-4 flex flex-col justify-between hover:shadow-md transition">
+                                <div>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{item.sku}</span>
+                                        <span className="bg-green-100 text-green-800 text-sm font-bold px-2 py-1 rounded">
+                                            ${item.price?.toFixed(0)} {/* Quité los decimales visuales asumiendo que usas CLP */}
+                                        </span>
+                                    </div>
+                                    <h3 className="font-bold text-lg text-gray-800 mb-2">{item.productName}</h3>
+                                    <p className="text-sm text-gray-600 mb-4">Stock disponible: <span className="font-bold text-blue-600">{item.availableQuantity}</span></p>
+                                </div>
+                                
+                                <button onClick={() => handleAddToCart(item)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition">
+                                    Agregar al Carrito
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            <div className="w-full lg:w-96 bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200 h-fit sticky top-6">
+                <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">🛒 Mi Carrito</h2>
+
+                {cart.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-6">Tu carrito está vacío.</p>
+                ) : (
+                    <div className="flex flex-col gap-4">
+                        <ul className="divide-y divide-gray-200">
+                            {cart.map((item) => (
+                                <li key={item.sku} className="py-3 flex justify-between items-center">
+                                    <div className="flex-1">
+                                        <p className="text-sm font-bold text-gray-800 line-clamp-1">{item.productName}</p>
+                                        <p className="text-xs font-semibold text-gray-600">${(item.price * item.quantity).toFixed(0)}</p>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2 ml-2">
+                                        <button onClick={() => handleRemoveFromCart(item.sku)} className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 font-bold">-</button>
+                                        <span className="font-bold text-sm w-4 text-center">{item.quantity}</span>
+                                        <button onClick={() => handleAddToCart(item)} className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-200 font-bold">+</button>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div className="border-t border-gray-200 pt-4 mt-2">
+                            {/* 2. DESGLOSE DEL TOTAL */}
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-gray-500 text-sm">Artículos:</span>
+                                <span className="font-bold text-gray-700">{cart.reduce((t, i) => t + i.quantity, 0)}</span>
+                            </div>
+                            
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-gray-500 text-sm">Subtotal:</span>
+                                <span className="font-bold text-gray-700">${cartSubtotal.toFixed(0)}</span>
+                            </div>
+
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-gray-500 text-sm">Costo de Envío:</span>
+                                {shippingCost === 0 ? (
+                                    <span className="font-bold text-green-600 uppercase text-sm">¡Gratis!</span>
+                                ) : (
+                                    <span className="font-bold text-gray-700">${shippingCost.toFixed(0)}</span>
+                                )}
+                            </div>
+
+                            {/* Mensaje de incentivo para llegar al envío gratis */}
+                            {cartSubtotal <= 50000 && (
+                                <p className="text-xs text-blue-600 text-right mb-4 mt-1 font-medium">
+                                    Agrega ${(50000 - cartSubtotal).toFixed(0)} más para envío gratis.
+                                </p>
+                            )}
+                            
+                            {/* Espaciador en caso de que ya tenga el envío gratis */}
+                            {cartSubtotal > 50000 && <div className="mb-4"></div>}
+
+                            <div className="flex justify-between items-center mb-4 border-t border-gray-200 pt-2">
+                                <span className="font-bold text-gray-800 text-lg">Total:</span>
+                                <span className="font-bold text-2xl text-green-600">${cartTotal.toFixed(0)}</span>
+                            </div>
+
+                            <button disabled={loading} onClick={handleCheckout} className={`w-full py-3 rounded font-bold text-white transition ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}>
+                                {loading ? "Procesando..." : "Realizar Pedido"}
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default ProductsPage;
