@@ -3,6 +3,8 @@ import {
     getInventory,
     createInventoryItem
 } from "../service/inventoryService";
+// Importamos la función para obtener el usuario actual y su rol
+import { getSaveUser } from "../service/authService";
 
 function InventoryPage() {
     const [inventory, setInventory] = useState([]);
@@ -17,6 +19,10 @@ function InventoryPage() {
         initialQuantity: 0,
         reorderLevel: 0
     });
+
+    // Obtenemos el usuario guardado en el localStorage
+    const currentUser = getSaveUser();
+    const userRole = currentUser?.role;
 
     useEffect(() => {
         loadInventory();
@@ -78,134 +84,135 @@ function InventoryPage() {
                 Gestión de Inventario
             </h2>
 
-            <div className="bg-gray-50 p-4 rounded-lg border mb-6">
-                <h3 className="font-semibold text-gray-700 mb-4">
-                    Agregar Producto
-                </h3>
+            {/* RENDERIZADO CONDICIONAL: Solo ADMIN y WAREHOUSE_MANAGER ven esta sección */}
+            {(userRole === "ROLE_ADMIN" || userRole === "ROLE_WAREHOUSE_MANAGER") && (
+                <div className="bg-gray-50 p-4 rounded-lg border mb-6">
+                    <h3 className="font-semibold text-gray-700 mb-4">
+                        Agregar Producto
+                    </h3>
 
-                <form onSubmit={handleCreateItem}>
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="p-2 text-left">
-                                    SKU
-                                </th>
+                    <form onSubmit={handleCreateItem}>
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                    <th className="p-2 text-left">
+                                        SKU
+                                    </th>
 
-                                <th className="p-2 text-left">
-                                    Producto
-                                </th>
+                                    <th className="p-2 text-left">
+                                        Producto
+                                    </th>
 
-                                <th className="p-2 text-left">
-                                    Bodega
-                                </th>
+                                    <th className="p-2 text-left">
+                                        Bodega
+                                    </th>
 
-                                <th className="p-2 text-left">
-                                    Cantidad
-                                </th>
+                                    <th className="p-2 text-left">
+                                        Cantidad
+                                    </th>
 
-                                <th className="p-2 text-left">
-                                    Reorden
-                                </th>
+                                    <th className="p-2 text-left">
+                                        Reorden
+                                    </th>
+                                </tr>
+                            </thead>
 
-                               
-                            </tr>
-                        </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="p-2">
+                                        <input
+                                            type="text"
+                                            value={newItem.sku}
+                                            onChange={(e) =>
+                                                setNewItem({
+                                                    ...newItem,
+                                                    sku: e.target.value
+                                                })
+                                            }
+                                            className="w-full p-2 border rounded"
+                                            required
+                                        />
+                                    </td>
 
-                        <tbody>
-                            <tr>
-                                <td className="p-2">
-                                    <input
-                                        type="text"
-                                        value={newItem.sku}
-                                        onChange={(e) =>
-                                            setNewItem({
-                                                ...newItem,
-                                                sku: e.target.value
-                                            })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                        required
-                                    />
-                                </td>
+                                    <td className="p-2">
+                                        <input
+                                            type="text"
+                                            value={newItem.productName}
+                                            onChange={(e) =>
+                                                setNewItem({
+                                                    ...newItem,
+                                                    productName: e.target.value
+                                                })
+                                            }
+                                            className="w-full p-2 border rounded"
+                                            required
+                                        />
+                                    </td>
 
-                                <td className="p-2">
-                                    <input
-                                        type="text"
-                                        value={newItem.productName}
-                                        onChange={(e) =>
-                                            setNewItem({
-                                                ...newItem,
-                                                productName: e.target.value
-                                            })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                        required
-                                    />
-                                </td>
+                                    <td className="p-2">
+                                        <input
+                                            type="text"
+                                            value={newItem.warehouseCode}
+                                            onChange={(e) =>
+                                                setNewItem({
+                                                    ...newItem,
+                                                    warehouseCode:
+                                                        e.target.value
+                                                })
+                                            }
+                                            className="w-full p-2 border rounded"
+                                            required
+                                        />
+                                    </td>
 
-                                <td className="p-2">
-                                    <input
-                                        type="text"
-                                        value={newItem.warehouseCode}
-                                        onChange={(e) =>
-                                            setNewItem({
-                                                ...newItem,
-                                                warehouseCode:
-                                                    e.target.value
-                                            })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                        required
-                                    />
-                                </td>
+                                    <td className="p-2">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={newItem.initialQuantity}
+                                            onChange={(e) =>
+                                                setNewItem({
+                                                    ...newItem,
+                                                    initialQuantity:
+                                                        Number(e.target.value)
+                                                })
+                                            }
+                                            className="w-full p-2 border rounded"
+                                            required
+                                        />
+                                    </td>
 
-                                <td className="p-2">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={newItem.initialQuantity}
-                                        onChange={(e) =>
-                                            setNewItem({
-                                                ...newItem,
-                                                initialQuantity:
-                                                    Number(e.target.value)
-                                            })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                        required
-                                    />
-                                </td>
+                                    <td className="p-2">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={newItem.reorderLevel}
+                                            onChange={(e) =>
+                                                setNewItem({
+                                                    ...newItem,
+                                                    reorderLevel:
+                                                        Number(e.target.value)
+                                                })
+                                            }
+                                            className="w-full p-2 border rounded"
+                                            required
+                                        />
+                                    </td>
 
-                                <td className="p-2">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={newItem.reorderLevel}
-                                        onChange={(e) =>
-                                            setNewItem({
-                                                ...newItem,
-                                                reorderLevel:
-                                                    Number(e.target.value)
-                                            })
-                                        }
-                                        className="w-full p-2 border rounded"
-                                        required
-                                    />
-                                </td>
-
-                                <td className="p-2">
-                                    <button
-                                        type="submit"
-                                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
-                                    >
-                                        Agregar
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
+                                    <td className="p-2">
+                                        <button
+                                            type="submit"
+                                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
+                                        >
+                                            Agregar
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            )}
 
             {message && (
                 <div className="mb-4 p-3 rounded bg-green-100 text-green-700">
