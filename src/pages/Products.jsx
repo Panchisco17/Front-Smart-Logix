@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getInventory } from "../service/inventoryService";
 import { getSaveUser } from "../service/authService";
+import { createOrderRequest } from "../api/orderApi";
 
 function ProductsPage() {
     const [products, setProducts] = useState([]);
@@ -8,6 +9,10 @@ function ProductsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
+    
+    const [customerName, setCustomerName] = useState("");
+    const [customerEmail, setCustomerEmail] = useState("");
+    const [shippingAddress, setShippingAddress] = useState("");
 
     const currentUser = getSaveUser();
 
@@ -59,23 +64,46 @@ function ProductsPage() {
         });
     }
 
-    // 1. CALCULAMOS SUBTOTAL, COSTO DE ENVÍO Y TOTAL
     const cartSubtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-    // Si el subtotal es mayor a 50000, el envío es 0. Si no, es 5000.
     const shippingCost = cartSubtotal > 50000 ? 0 : 5000;
     const cartTotal = cartSubtotal + shippingCost;
 
     async function handleCheckout() {
         if (cart.length === 0) return;
+        
+        if (!customerName.trim() || !customerEmail.trim() || !shippingAddress.trim()) {
+            setError("Por favor, completa tu nombre, correo y dirección de envío.");
+            return;
+        }
+
         try {
             setLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            setError("");
+            setMessage("");
+
+            const orderData = {
+                customerName: customerName.trim(),
+                customerEmail: customerEmail.trim(),
+                shippingAddress: shippingAddress.trim(),
+                lines: cart.map(item => ({
+                    sku: item.sku,
+                    quantity: item.quantity,
+                    unitPrice: item.price 
+                }))
+            };
+
+            await createOrderRequest(orderData);
+
             setMessage("¡Pedido realizado con éxito!");
             setCart([]); 
+            setShippingAddress(""); 
+            setCustomerName("");
+            setCustomerEmail("");
             await loadProducts(); 
-            setTimeout(() => setMessage(""), 3000);
+            setTimeout(() => setMessage(""), 4000);
         } catch (err) {
-            setError("Hubo un problema al procesar el pedido.");
+            setMessage("");
+            setError(err.message || "Hubo un problema al procesar el pedido.");
         } finally {
             setLoading(false);
         }
@@ -87,6 +115,7 @@ function ProductsPage() {
 
     return (
         <div className="flex flex-col lg:flex-row gap-6">
+            
             <div className="flex-1 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <h2 className="text-xl font-bold mb-6 text-gray-800">Catálogo de Productos</h2>
 
@@ -103,7 +132,7 @@ function ProductsPage() {
                                     <div className="flex justify-between items-start mb-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{item.sku}</span>
                                         <span className="bg-green-100 text-green-800 text-sm font-bold px-2 py-1 rounded">
-                                            ${item.price?.toFixed(0)} {/* Quité los decimales visuales asumiendo que usas CLP */}
+                                            ${item.price?.toFixed(0)} 
                                         </span>
                                     </div>
                                     <h3 className="font-bold text-lg text-gray-800 mb-2">{item.productName}</h3>
@@ -144,7 +173,6 @@ function ProductsPage() {
                         </ul>
 
                         <div className="border-t border-gray-200 pt-4 mt-2">
-                            {/* 2. DESGLOSE DEL TOTAL */}
                             <div className="flex justify-between items-center mb-1">
                                 <span className="text-gray-500 text-sm">Artículos:</span>
                                 <span className="font-bold text-gray-700">{cart.reduce((t, i) => t + i.quantity, 0)}</span>
@@ -164,19 +192,55 @@ function ProductsPage() {
                                 )}
                             </div>
 
-                            {/* Mensaje de incentivo para llegar al envío gratis */}
                             {cartSubtotal <= 50000 && (
                                 <p className="text-xs text-blue-600 text-right mb-4 mt-1 font-medium">
                                     Agrega ${(50000 - cartSubtotal).toFixed(0)} más para envío gratis.
                                 </p>
                             )}
                             
-                            {/* Espaciador en caso de que ya tenga el envío gratis */}
                             {cartSubtotal > 50000 && <div className="mb-4"></div>}
 
                             <div className="flex justify-between items-center mb-4 border-t border-gray-200 pt-2">
                                 <span className="font-bold text-gray-800 text-lg">Total:</span>
                                 <span className="font-bold text-2xl text-green-600">${cartTotal.toFixed(0)}</span>
+                            </div>
+
+                            <div className="flex flex-col gap-3 mb-4 border-t border-gray-200 pt-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-1">Nombre Completo</label>
+                                    <input 
+                                        type="text" 
+                                        value={customerName}
+                                        onChange={(e) => setCustomerName(e.target.value)}
+                                        placeholder="Ej: Juan Pérez" 
+                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-1">Correo Electrónico</label>
+                                    <input 
+                                        type="email" 
+                                        value={customerEmail}
+                                        onChange={(e) => setCustomerEmail(e.target.value)}
+                                        placeholder="Ej: correo@mail.com" 
+                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-1">Dirección de Envío</label>
+                                    <input 
+                                        type="text" 
+                                        value={shippingAddress}
+                                        onChange={(e) => setShippingAddress(e.target.value)}
+                                        placeholder="Ej: Concha y Toro 123, Puente Alto" 
+                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
+                                        required
+                                    />
+                                </div>
                             </div>
 
                             <button disabled={loading} onClick={handleCheckout} className={`w-full py-3 rounded font-bold text-white transition ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}>

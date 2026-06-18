@@ -1,248 +1,142 @@
-import React, { useState, useEffect } from 'react';
-import { getOrders, createOrder, updateOrder, deleteOrder } from '../service/orderService';
+import { useEffect, useState } from "react";
+import { getOrdersRequest, updateOrderStatusRequest } from "../api/orderApi";
 
-export default function Order() {
+function OrderPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [editingNumber, setEditingNumber] = useState(null);
-
-    const [form, setForm] = useState({
-        customerName: '',
-        customerEmail: '',
-        shippingAddress: '',
-        sku: '',
-        quantity: 1,
-        unitPrice: 0
-    });
+    const [error, setError] = useState("");
 
     useEffect(() => {
         loadOrders();
     }, []);
 
-    const loadOrders = async () => {
+    async function loadOrders() {
+        setLoading(true);
         try {
-            setLoading(true);
-            const response = await getOrders();
-            setOrders(Array.isArray(response) ? response : []);
-            setError(null);
+            const response = await getOrdersRequest();
+            const sortedOrders = response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            setOrders(sortedOrders);
         } catch (err) {
-            console.error("Error al cargar órdenes:", err);
-            setError("No se pudieron cargar las órdenes del servidor.");
+            setError("Error al cargar la lista de órdenes.");
         } finally {
             setLoading(false);
         }
-    };
+    }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        const payload = {
-            customerName: form.customerName.trim(),
-            customerEmail: form.customerEmail.trim(),
-            shippingAddress: form.shippingAddress.trim(),
-            lines: [
-                {
-                    sku: form.sku.trim(),
-                    quantity: Number(form.quantity),
-                    unitPrice: Number(form.unitPrice)
-                }
-            ]
-        };
-
+    async function handleUpdateStatus(orderNumber, nextStatus) {
         try {
-            if (editingNumber) {
-                await updateOrder(editingNumber, payload);
-                alert("Orden actualizada con éxito");
-            } else {
-                await createOrder(payload);
-                alert("Orden creada con éxito");
-            }
-            resetForm();
-            loadOrders();
+            await updateOrderStatusRequest(orderNumber, nextStatus);
+            await loadOrders(); 
         } catch (err) {
-            console.error("Error al guardar la orden:", err);
-            alert("Error al guardar la orden. Revisa la consola.");
+            alert(err.message || "Error al cambiar el estado del pedido.");
+        }
+    }
+
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'PENDING': 
+                return <span className="bg-gray-100 text-gray-800 text-xs font-bold px-2.5 py-1 rounded">Pendiente</span>;
+            case 'APPROVED': 
+                return <span className="bg-yellow-100 text-yellow-800 text-xs font-bold px-2.5 py-1 rounded">En Bodega (Aprobado)</span>;
+            case 'SHIPMENT_REQUESTED': 
+                return <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded">Despachado</span>;
+            case 'REJECTED': 
+                return <span className="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded">Rechazado</span>;
+            case 'FAILED': 
+                return <span className="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded">Error de Envío</span>;
+            default: 
+                return <span className="bg-gray-100 text-gray-800 text-xs font-bold px-2.5 py-1 rounded">{status}</span>;
         }
     };
 
-    const handleEdit = (order) => {
-        setEditingNumber(order.orderNumber);
-        
-        const firstLine = order.lines && order.lines[0] ? order.lines[0] : {};
-
-        setForm({
-            customerName: '',
-            customerEmail: '',
-            shippingAddress: '',
-            sku: firstLine.sku || '',
-            quantity: firstLine.quantity || 1,
-            unitPrice: firstLine.unitPrice || 0
-        });
-    };
-
-    const handleDeleteOrder = async (order) => {
-        if (!window.confirm(`¿Estás seguro de eliminar la orden ${order.orderNumber}?`)) return;
-        try {
-            await deleteOrder(order.orderNumber);
-            alert("Orden eliminada con éxito");
-            loadOrders();
-        } catch (err) {
-            console.error("Error al eliminar orden:", err);
-            alert("Error al eliminar orden.");
-        }
-    };
-
-    const resetForm = () => {
-        setEditingNumber(null);
-        setForm({
-            customerName: '',
-            customerEmail: '',
-            shippingAddress: '',
-            sku: '',
-            quantity: 1,
-            unitPrice: 0
-        });
-    };
+    if (loading) {
+        return <div className="text-center py-10 text-gray-600">Cargando órdenes...</div>;
+    }
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">Gestión de Órdenes</h1>
-            
-            {/* Formulario de Registro / Edición */}
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm mb-8 border border-gray-200">
-                <h2 className="text-lg font-semibold mb-4 text-gray-700">
-                    {editingNumber ? `Editar Orden: ${editingNumber}` : 'Crear Nueva Orden'}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-600 mb-1">Nombre Cliente</label>
-                        <input 
-                            type="text" 
-                            className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
-                            value={form.customerName}
-                            onChange={e => setForm({...form, customerName: e.target.value})}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-600 mb-1">Email Cliente</label>
-                        <input 
-                            type="email" 
-                            className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
-                            value={form.customerEmail}
-                            onChange={e => setForm({...form, customerEmail: e.target.value})}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-600 mb-1">Dirección de Envío</label>
-                        <input 
-                            type="text" 
-                            className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
-                            value={form.shippingAddress}
-                            onChange={e => setForm({...form, shippingAddress: e.target.value})}
-                            required
-                        />
-                    </div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-xl font-bold mb-6 text-gray-800">Gestión de Órdenes</h2>
+
+            {error && (
+                <div className="mb-4 p-3 rounded bg-red-100 text-red-700">
+                    {error}
                 </div>
+            )}
 
-                <div className="border-t pt-4 mt-4">
-                    <h3 className="text-md font-medium mb-3 text-gray-700">Detalle del Producto</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">SKU</label>
-                            <input 
-                                type="text" 
-                                className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
-                                value={form.sku}
-                                onChange={e => setForm({...form, sku: e.target.value})}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Cantidad</label>
-                            <input 
-                                type="number" 
-                                className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
-                                value={form.quantity}
-                                onChange={e => setForm({...form, quantity: e.target.value})}
-                                min="1"
-                                required
-                        />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Precio Unitario</label>
-                            <input 
-                                type="number" 
-                                className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
-                                value={form.unitPrice}
-                                onChange={e => setForm({...form, unitPrice: e.target.value})}
-                                min="0"
-                                required
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-6 flex gap-2 justify-end">
-                    {editingNumber && (
-                        <button type="button" onClick={resetForm} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition">
-                            Cancelar
-                        </button>
-                    )}
-                    <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition">
-                        {editingNumber ? 'Actualizar Orden' : 'Crear Orden'}
-                    </button>
-                </div>
-            </form>
-
-            {/* Alerta de Error */}
-            {error && <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">{error}</div>}
-
-            {/* Tabla de Órdenes Simplificada */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
-                <table className="w-full text-sm text-left text-gray-500">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left text-gray-600">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="px-6 py-3">Nº Orden</th>
-                            <th className="px-6 py-3">Total</th>
+                            <th className="px-6 py-4">N° Orden</th>
+                            <th className="px-6 py-4">Fecha</th>
+                            <th className="px-6 py-4">Cliente</th>
+                            <th className="px-6 py-4">Total</th>
+                            <th className="px-6 py-4">Estado</th>
+                            <th className="px-6 py-4 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {loading ? (
+                        {orders.length === 0 ? (
                             <tr>
-                                <td colSpan="5" className="text-center py-8 text-gray-400">Cargando datos del sistema...</td>
-                            </tr>
-                        ) : orders.length === 0 ? (
-                            <tr>
-                                <td colSpan="5" className="text-center py-8 text-gray-400">No se encontraron registros de órdenes.</td>
+                                <td colSpan="6" className="text-center py-6 text-gray-500">
+                                    No hay órdenes registradas.
+                                </td>
                             </tr>
                         ) : (
                             orders.map((order) => (
-                                <tr key={order.orderNumber} className="bg-white hover:bg-gray-50 transition">
-                                    <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                        {order.orderNumber}
+                                <tr key={order.orderNumber} className="bg-white hover:bg-gray-50 transition-colors">
+                                    <td className="px-6 py-4 font-bold text-gray-900">{order.orderNumber}</td>
+                                    <td className="px-6 py-4 text-xs">
+                                        {new Date(order.createdAt).toLocaleString()}
                                     </td>
-                                    <td className="px-6 py-4 font-semibold text-gray-800">
-                                        ${order.totalAmount?.toLocaleString('es-CL') || order.totalAmount}
+                                    <td className="px-6 py-4">
+                                        <p className="font-bold text-gray-800">{order.customerName}</p>
+                                        <p className="text-xs text-gray-500 line-clamp-1">{order.shippingAddress}</p>
                                     </td>
-                                    
-                                    <td className="px-6 py-4 text-center whitespace-nowrap">
-                                        <div className="flex gap-2 justify-center">
+                                    <td className="px-6 py-4 font-bold text-green-600">
+                                        ${order.totalAmount?.toFixed(0)}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {getStatusBadge(order.status)}
+                                    </td>
+                                    <td className="px-6 py-4 flex justify-center items-center min-w-[160px]">
+                                        
+                                        {order.status === 'APPROVED' && (
                                             <button 
-                                                onClick={() => handleEdit(order)} 
-                                                className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded hover:bg-amber-100 transition text-xs"
+                                                onClick={() => handleUpdateStatus(order.orderNumber, 'SHIPMENT_REQUESTED')}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded transition shadow-sm w-full"
                                             >
-                                                Editar
+                                                🚚 Despachar Pedido
                                             </button>
-                                            <button 
-                                                onClick={() => handleDeleteOrder(order)} 
-                                                className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 transition text-xs"
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </div>
+                                        )}
+
+                                        {order.status === 'PENDING' && (
+                                            <span className="text-xs text-gray-500 font-medium italic text-center">
+                                                Validando inventario...
+                                            </span>
+                                        )}
+
+                                        {order.status === 'SHIPMENT_REQUESTED' && (
+                                            <div className="flex flex-col text-center w-full">
+                                                <span className="text-xs font-bold text-gray-500">Enviado</span>
+                                                <span className="text-[11px] font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-1 rounded mt-1">
+                                                    {order.trackingCode || "Generando..."}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {order.status === 'REJECTED' && (
+                                            <span className="text-xs text-red-500 font-medium text-center line-clamp-2" title={order.rejectionReason}>
+                                                {order.rejectionReason || "Rechazado por el sistema"}
+                                            </span>
+                                        )}
+
+                                        {order.status === 'FAILED' && (
+                                            <span className="text-xs text-red-600 font-bold text-center">
+                                                Fallo de Guía
+                                            </span>
+                                        )}
+
                                     </td>
                                 </tr>
                             ))
@@ -253,3 +147,5 @@ export default function Order() {
         </div>
     );
 }
+
+export default OrderPage;
