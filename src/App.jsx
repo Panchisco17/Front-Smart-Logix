@@ -7,10 +7,17 @@ import OrderPage from './pages/Order'
 import InventoryPage from './pages/Inventory'
 import UsersPage from './pages/Users'
 import ProductsPage from './pages/Products'
+// 1. IMPORTAMOS LA NUEVA PÁGINA DE MIS PEDIDOS
+import MyOrdersPage from './pages/MyOrders'
 
 const PRIVATE_ROUTER = [
+  // Tienda (Visible para Clientes y Administradores)
   { key: "products", label: "Tienda", hash: "#/products", allowedRoles: ["ROLE_USER", "ROLE_ADMIN"] },
   
+  // 2. NUEVA RUTA: Mis Pedidos (Solo para Clientes, o Admin si quiere revisar)
+  { key: "my-orders", label: "Mis Pedidos", hash: "#/my-orders", allowedRoles: ["ROLE_USER", "ROLE_ADMIN"] },
+  
+  // Vistas Administrativas
   { key: "inventory", label: "Inventario", hash: "#/inventory", allowedRoles: ["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"] },
   { key: "order", label: "Órdenes", hash: "#/order", allowedRoles: ["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"] },
   { key: "shipment", label: "Envíos", hash: "#/shipment", allowedRoles: ["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"] },
@@ -67,6 +74,8 @@ function App() {
 
   function renderPrivate() {
     if (current === "products") return <ProductsPage />
+    // 3. RENDERIZAMOS LA NUEVA PÁGINA SEGÚN EL HASH
+    if (current === "my-orders") return <MyOrdersPage />
     if (current === "shipment") return <ShipmentsPage />
     if (current === "order") return <OrderPage />
     if (current === "inventory") return <InventoryPage />
