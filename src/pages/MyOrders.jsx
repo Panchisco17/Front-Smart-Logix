@@ -19,26 +19,23 @@ function MyOrdersPage() {
         try {
             const response = await getOrdersRequest();
             
-            // Extraemos los posibles identificadores del usuario desde el JWT
-            const username = currentUser?.username?.toLowerCase() || "";
-            const email = currentUser?.email?.toLowerCase() || currentUser?.sub?.toLowerCase() || "";
+            // 1. Obtenemos tu usuario logueado y lo pasamos a minúsculas
+            const loggedInUser = (currentUser?.sub || currentUser?.username || "").toLowerCase();
 
-            // Filtro Inteligente: Buscamos órdenes que coincidan con el correo O con el nombre de usuario
+            console.log("🕵️ Usuario logueado en React:", loggedInUser);
+            console.log("📦 Todas las órdenes que llegaron del backend:", response);
+
+            // 2. Filtramos ignorando mayúsculas y minúsculas
             const userOrders = response.filter((order) => {
-                const orderEmail = order.customerEmail?.toLowerCase() || "";
-                const orderName = order.customerName?.toLowerCase() || "";
-                
-                const matchEmail = email && orderEmail === email;
-                const matchName = username && orderName === username;
-                const matchUsernameInEmail = username && orderEmail.includes(username); // Por si el correo es admin@...
-                
-                return matchEmail || matchName || matchUsernameInEmail;
+                // Si el backend mandó el username, lo pasamos a minúsculas para comparar
+                const orderOwner = (order.username || "").toLowerCase();
+                return orderOwner === loggedInUser;
             });
 
-            // Ordenamos de la más reciente a la más antigua
+            console.log("✅ Órdenes filtradas para este usuario:", userOrders);
+
             const sortedOrders = userOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             setOrders(sortedOrders);
-            
         } catch (err) {
             setError("No pudimos cargar tu historial de pedidos.");
         } finally {
