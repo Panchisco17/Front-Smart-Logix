@@ -80,15 +80,25 @@ function ProductsPage() {
         }
     }
 
-    // Cálculo del subtotal actualizado con lógica 2x1
-    const cartSubtotal = cart.reduce((total, item) => {
-        if (isDiscountApplied) {
-            // Math.ceil agrupa de a 2. Si llevas 1 cobras 1, si llevas 2 cobras 1, si llevas 3 cobras 2, etc.
-            const itemsToPay = Math.ceil(item.quantity / 2);
-            return total + (item.price * itemsToPay);
+    // Cálculo del subtotal base sin descuentos
+    const baseSubtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+    let discountAmount = 0;
+    if (isDiscountApplied) {
+        // Buscamos productos que tengan 2 o más unidades
+        const eligibleItems = cart.filter(item => item.quantity >= 2);
+        
+        if (eligibleItems.length > 0) {
+            // Ordenamos por precio de menor a mayor para aplicar el 2x1 al producto más barato
+            const itemToDiscount = eligibleItems.sort((a, b) => a.price - b.price)[0];
+            
+            // Solo descontamos el equivalente a 1 unidad del producto de menor valor
+            discountAmount = itemToDiscount.price; 
         }
-        return total + (item.price * item.quantity);
-    }, 0);
+    }
+
+    // El subtotal real del carrito menos el descuento aplicado
+    const cartSubtotal = baseSubtotal - discountAmount;
 
     const shippingCost = cartSubtotal > 50000 ? 0 : 5000;
     const cartTotal = cartSubtotal + shippingCost;
@@ -234,8 +244,16 @@ function ProductsPage() {
                             
                             <div className="flex justify-between items-center mb-1">
                                 <span className="text-gray-500 text-sm">Subtotal:</span>
-                                <span className="font-bold text-gray-700">${cartSubtotal.toFixed(0)}</span>
+                                <span className="font-bold text-gray-700">${baseSubtotal.toFixed(0)}</span>
                             </div>
+
+                            {/* --- SECCIÓN NUEVA: MUESTRA EL DESCUENTO SI EXISTE --- */}
+                            {discountAmount > 0 && (
+                                <div className="flex justify-between items-center mb-1 text-green-600">
+                                    <span className="text-sm font-semibold">Descuento 2x1 aplicado:</span>
+                                    <span className="font-bold">-${discountAmount.toFixed(0)}</span>
+                                </div>
+                            )}
 
                             <div className="flex justify-between items-center mb-1">
                                 <span className="text-gray-500 text-sm">Costo de Envío:</span>
