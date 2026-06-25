@@ -14,6 +14,10 @@ function ProductsPage() {
     const [customerEmail, setCustomerEmail] = useState("");
     const [shippingAddress, setShippingAddress] = useState("");
 
+    // Nuevos estados para manejar el descuento
+    const [discountCode, setDiscountCode] = useState("");
+    const [isDiscountApplied, setIsDiscountApplied] = useState(false);
+
     const currentUser = getSaveUser();
 
     useEffect(() => {
@@ -64,7 +68,28 @@ function ProductsPage() {
         });
     }
 
-    const cartSubtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    // Nueva función para validar y aplicar el descuento
+    function handleApplyDiscount() {
+        if (discountCode.trim().toUpperCase() === "2X1") {
+            setIsDiscountApplied(true);
+            setMessage("¡Código 2x1 aplicado con éxito!");
+            setError("");
+        } else {
+            setError("Código de descuento inválido");
+            setIsDiscountApplied(false);
+        }
+    }
+
+    // Cálculo del subtotal actualizado con lógica 2x1
+    const cartSubtotal = cart.reduce((total, item) => {
+        if (isDiscountApplied) {
+            // Math.ceil agrupa de a 2. Si llevas 1 cobras 1, si llevas 2 cobras 1, si llevas 3 cobras 2, etc.
+            const itemsToPay = Math.ceil(item.quantity / 2);
+            return total + (item.price * itemsToPay);
+        }
+        return total + (item.price * item.quantity);
+    }, 0);
+
     const shippingCost = cartSubtotal > 50000 ? 0 : 5000;
     const cartTotal = cartSubtotal + shippingCost;
 
@@ -85,6 +110,7 @@ function ProductsPage() {
                 customerName: customerName.trim(),
                 customerEmail: customerEmail.trim(),
                 shippingAddress: shippingAddress.trim(),
+                discountCode: isDiscountApplied ? discountCode.toUpperCase() : null, // Se envía el código usado
                 lines: cart.map(item => ({
                     sku: item.sku,
                     quantity: item.quantity,
@@ -99,6 +125,11 @@ function ProductsPage() {
             setShippingAddress(""); 
             setCustomerName("");
             setCustomerEmail("");
+            
+            // Reiniciamos los estados del código de descuento
+            setDiscountCode("");
+            setIsDiscountApplied(false);
+
             await loadProducts(); 
             setTimeout(() => setMessage(""), 4000);
         } catch (err) {
@@ -173,6 +204,29 @@ function ProductsPage() {
                         </ul>
 
                         <div className="border-t border-gray-200 pt-4 mt-2">
+                            
+                            {/* --- SECCIÓN NUEVA: INPUT DESCUENTO --- */}
+                            <div className="flex gap-2 mb-4">
+                                <input
+                                    type="text"
+                                    value={discountCode}
+                                    onChange={(e) => setDiscountCode(e.target.value)}
+                                    placeholder="Ingresa código (Ej: 2X1)"
+                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm uppercase"
+                                    disabled={isDiscountApplied}
+                                />
+                                <button
+                                    onClick={handleApplyDiscount}
+                                    disabled={isDiscountApplied || !discountCode.trim()}
+                                    className={`px-4 py-2 rounded font-bold text-white transition text-sm ${
+                                        isDiscountApplied ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                                    }`}
+                                >
+                                    {isDiscountApplied ? "Aplicado" : "Aplicar"}
+                                </button>
+                            </div>
+                            {/* --- FIN SECCIÓN NUEVA --- */}
+
                             <div className="flex justify-between items-center mb-1">
                                 <span className="text-gray-500 text-sm">Artículos:</span>
                                 <span className="font-bold text-gray-700">{cart.reduce((t, i) => t + i.quantity, 0)}</span>
@@ -236,7 +290,7 @@ function ProductsPage() {
                                         type="text" 
                                         value={shippingAddress}
                                         onChange={(e) => setShippingAddress(e.target.value)}
-                                        placeholder="Ej: Concha y Toro 123, Puente Alto" 
+                                        placeholder="Ej: Concha y Toro 123" 
                                         className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
                                         required
                                     />
