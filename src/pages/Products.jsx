@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getInventory } from "../service/inventoryService";
 import { getSaveUser } from "../service/authService";
 import { createOrderRequest } from "../api/orderApi";
+import { getCouponsRequest } from "../api/couponApi";
 
 function ProductsPage() {
     const [products, setProducts] = useState([]);
@@ -9,7 +10,7 @@ function ProductsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
-    
+
     const [customerName, setCustomerName] = useState("");
     const [customerEmail, setCustomerEmail] = useState("");
     const [shippingAddress, setShippingAddress] = useState("");
@@ -17,11 +18,13 @@ function ProductsPage() {
     // Nuevos estados para manejar el descuento
     const [discountCode, setDiscountCode] = useState("");
     const [isDiscountApplied, setIsDiscountApplied] = useState(false);
+    const [coupons, setCoupons] = useState([]);
 
     const currentUser = getSaveUser();
 
     useEffect(() => {
         loadProducts();
+        loadCoupons();
     }, []);
 
     async function loadProducts() {
@@ -34,6 +37,16 @@ function ProductsPage() {
             setError("Error al cargar los productos disponibles.");
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function loadCoupons() {
+        try {
+            const response = await getCouponsRequest();
+            setCoupons(response);
+        } catch (err) {
+            // Si falla la carga de cupones, simplemente no habrá descuentos disponibles.
+            setCoupons([]);
         }
     }
 
@@ -68,32 +81,76 @@ function ProductsPage() {
         });
     }
 
-    // Nueva función para validar y aplicar el descuento
-    function handleApplyDiscount() {
-        if (discountCode.trim().toUpperCase() === "2X1") {
-            setIsDiscountApplied(true);
-            setMessage("¡Código 2x1 aplicado con éxito!");
-            setError("");
-        } else {
-            setError("Código de descuento inválido");
-            setIsDiscountApplied(false);
-        }
-    }
-
     // Cálculo del subtotal base sin descuentos
     const baseSubtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
+    // Nueva función para validar y aplicar el descuento contra los cupones reales
+    // administrados por el equipo de Cupones (backend es la fuente de la verdad).
+    function handleApplyDiscount() {
+        const code = discountCode.trim().toUpperCase();
+        const coupon = coupons.find((c) => c.code === code);
+
+        if (!coupon) {
+            setError("Código de descuento inválido");
+            setIsDiscountApplied(false);
+            return;
+        }
+        if (!coupon.active) {
+            setError("Este cupón ya no está disponible.");
+            setIsDiscountApplied(false);
+            return;
+        }
+        const now = new Date();
+        if (coupon.startDate && now < new Date(coupon.startDate)) {
+            setError("Este cupón todavía no está vigente.");
+            setIsDiscountApplied(false);
+            return;
+        }
+        if (coupon.endDate && now > new Date(coupon.endDate)) {
+            setError("Este cupón ya venció.");
+            setIsDiscountApplied(false);
+            return;
+        }
+        if (coupon.requiredEmailDomain && !customerEmail.trim().toLowerCase().endsWith(coupon.requiredEmailDomain.toLowerCase())) {
+            setError(`Este cupón es válido solo para correos ${coupon.requiredEmailDomain}`);
+            setIsDiscountApplied(false);
+            return;
+        }
+        if (coupon.minSubtotal && baseSubtotal < coupon.minSubtotal) {
+            setError(`Este cupón requiere un carrito de $${coupon.minSubtotal} o más.`);
+            setIsDiscountApplied(false);
+            return;
+        }
+
+        setIsDiscountApplied(true);
+        setError("");
+        setMessage(
+            `¡Cupón ${code} aplicado!${coupon.description ? " " + coupon.description : ""}` +
+            (coupon.firstPurchaseOnly ? " (el backend confirma si es tu primera compra)" : "")
+        );
+    }
+
     let discountAmount = 0;
     if (isDiscountApplied) {
-        // Buscamos productos que tengan 2 o más unidades
-        const eligibleItems = cart.filter(item => item.quantity >= 2);
-        
-        if (eligibleItems.length > 0) {
-            // Ordenamos por precio de menor a mayor para aplicar el 2x1 al producto más barato
-            const itemToDiscount = eligibleItems.sort((a, b) => a.price - b.price)[0];
-            
-            // Solo descontamos el equivalente a 1 unidad del producto de menor valor
-            discountAmount = itemToDiscount.price; 
+        const appliedCode = discountCode.trim().toUpperCase();
+        const coupon = coupons.find((c) => c.code === appliedCode);
+
+        if (coupon?.type === "TWO_FOR_ONE") {
+            // Buscamos productos que tengan 2 o más unidades
+            const eligibleItems = cart.filter(item => item.quantity >= 2);
+
+            if (eligibleItems.length > 0) {
+                // Ordenamos por precio de menor a mayor para aplicar el 2x1 al producto más barato
+                const itemToDiscount = eligibleItems.sort((a, b) => a.price - b.price)[0];
+
+                // Solo descontamos el equivalente a 1 unidad del producto de menor valor
+                discountAmount = itemToDiscount.price;
+            }
+        } else if (coupon?.type === "PERCENTAGE") {
+            // Vista previa; el backend valida además el dominio del correo y la primera compra.
+            discountAmount = baseSubtotal * (Number(coupon.value) / 100);
+        } else if (coupon?.type === "FIXED_AMOUNT") {
+            discountAmount = Number(coupon.value);
         }
     }
 
@@ -235,7 +292,7 @@ function ProductsPage() {
                                     type="text"
                                     value={discountCode}
                                     onChange={(e) => setDiscountCode(e.target.value)}
-                                    placeholder="Ingresa código (Ej: 2X1)"
+                                    placeholder="Ingresa código (Ej: 2X1, DUOC25, SMART5000)"
                                     className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm uppercase"
                                     disabled={isDiscountApplied}
                                 />
@@ -264,7 +321,7 @@ function ProductsPage() {
                             {/* --- SECCIÓN NUEVA: MUESTRA EL DESCUENTO SI EXISTE --- */}
                             {discountAmount > 0 && (
                                 <div className="flex justify-between items-center mb-1 text-green-600">
-                                    <span className="text-sm font-semibold">Descuento 2x1 aplicado:</span>
+                                    <span className="text-sm font-semibold">Descuento ({discountCode.trim().toUpperCase()}) aplicado:</span>
                                     <span className="font-bold">-${discountAmount.toFixed(0)}</span>
                                 </div>
                             )}

@@ -9,6 +9,7 @@ import UsersPage from './pages/Users'
 import ProductsPage from './pages/Products'
 // 1. IMPORTAMOS LA NUEVA PÁGINA DE MIS PEDIDOS
 import MyOrdersPage from './pages/MyOrders'
+import CouponsPage from './pages/Coupons'
 
 const PRIVATE_ROUTER = [
   // Tienda (Visible para Clientes y Administradores)
@@ -21,6 +22,7 @@ const PRIVATE_ROUTER = [
   { key: "inventory", label: "Inventario", hash: "#/inventory", allowedRoles: ["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"] },
   { key: "order", label: "Órdenes", hash: "#/order", allowedRoles: ["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"] },
   { key: "shipment", label: "Envíos", hash: "#/shipment", allowedRoles: ["ROLE_ADMIN", "ROLE_WAREHOUSE_MANAGER"] },
+  { key: "coupons", label: "Cupones", hash: "#/coupons", allowedRoles: ["ROLE_ADMIN"] },
   { key: "users", label: "Usuarios", hash: "#/users", allowedRoles: ["ROLE_ADMIN"] }
 ]
 
@@ -97,6 +99,7 @@ function App() {
     if (current === "shipment") return <ShipmentsPage />
     if (current === "order") return <OrderPage />
     if (current === "inventory") return <InventoryPage />
+    if (current === "coupons") return <CouponsPage />
     if (current === "users") return <UsersPage />
     return <h1 className="text-xl text-gray-500">Cargando interfaz...</h1>
   }
