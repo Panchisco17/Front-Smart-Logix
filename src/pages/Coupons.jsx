@@ -11,7 +11,7 @@ const EMPTY_FORM = {
     code: "",
     description: "",
     type: "PERCENTAGE",
-    value: "",
+    amount: "",
     minSubtotal: "",
     requiredEmailDomain: "",
     firstPurchaseOnly: false,
@@ -80,7 +80,7 @@ function CouponsPage() {
             code: coupon.code,
             description: coupon.description || "",
             type: coupon.type,
-            value: coupon.value ?? "",
+            amount: coupon.amount ?? "",
             minSubtotal: coupon.minSubtotal ?? "",
             requiredEmailDomain: coupon.requiredEmailDomain || "",
             firstPurchaseOnly: coupon.firstPurchaseOnly,
@@ -101,7 +101,7 @@ function CouponsPage() {
             code: form.code.trim().toUpperCase(),
             description: form.description.trim() || null,
             type: form.type,
-            value: form.value !== "" ? Number(form.value) : null,
+            amount: form.amount !== "" ? Number(form.amount) : null,
             minSubtotal: form.minSubtotal !== "" ? Number(form.minSubtotal) : null,
             requiredEmailDomain: form.requiredEmailDomain.trim() || null,
             firstPurchaseOnly: form.firstPurchaseOnly,
@@ -191,8 +191,8 @@ function CouponsPage() {
                             type="number"
                             step="0.01"
                             min="0"
-                            value={form.value}
-                            onChange={(e) => setForm({ ...form, value: e.target.value })}
+                            value={form.amount}
+                            onChange={(e) => setForm({ ...form, amount: e.target.value })}
                             className="w-full p-2 border rounded"
                             disabled={form.type === "TWO_FOR_ONE"}
                         />
@@ -327,8 +327,8 @@ function CouponsPage() {
                                             {coupon.type === "TWO_FOR_ONE"
                                                 ? "—"
                                                 : coupon.type === "PERCENTAGE"
-                                                    ? `${coupon.value}%`
-                                                    : `$${coupon.value}`}
+                                                    ? `${coupon.amount}%`
+                                                    : `$${coupon.amount}`}
                                         </td>
                                         <td className="px-4 py-3 text-xs text-gray-500">
                                             {coupon.minSubtotal ? <div>Mín: ${coupon.minSubtotal}</div> : null}

@@ -148,9 +148,9 @@ function ProductsPage() {
             }
         } else if (coupon?.type === "PERCENTAGE") {
             // Vista previa; el backend valida además el dominio del correo y la primera compra.
-            discountAmount = baseSubtotal * (Number(coupon.value) / 100);
+            discountAmount = baseSubtotal * (Number(coupon.amount) / 100);
         } else if (coupon?.type === "FIXED_AMOUNT") {
-            discountAmount = Number(coupon.value);
+            discountAmount = Number(coupon.amount);
         }
     }
 
