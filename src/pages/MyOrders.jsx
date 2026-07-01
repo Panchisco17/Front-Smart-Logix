@@ -47,14 +47,16 @@ function MyOrdersPage() {
         switch (status) {
             case 'PENDING': 
                 return <span className="bg-gray-100 text-gray-800 text-xs font-bold px-3 py-1 rounded-full border border-gray-200">Pendiente</span>;
-            case 'APPROVED': 
-                return <span className="bg-yellow-50 text-yellow-700 text-xs font-bold px-3 py-1 rounded-full border border-yellow-200">En Preparación</span>;
-            case 'SHIPMENT_REQUESTED': 
+            case 'APPROVED':
+                return <span className="bg-yellow-50 text-yellow-700 text-xs font-bold px-3 py-1 rounded-full border border-yellow-200">Pendiente de Pago</span>;
+            case 'PAID':
+                return <span className="bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded-full border border-green-200">Pagado</span>;
+            case 'SHIPMENT_REQUESTED':
                 return <span className="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full border border-blue-200">Despachado</span>;
-            case 'REJECTED': 
+            case 'REJECTED':
                 return <span className="bg-red-50 text-red-700 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Rechazado</span>;
-            case 'FAILED': 
-                return <span className="bg-red-50 text-red-700 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Problema con el Envío</span>;
+            case 'FAILED':
+                return <span className="bg-red-50 text-red-700 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Pago Rechazado</span>;
             default: 
                 return <span className="bg-gray-100 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{status}</span>;
         }

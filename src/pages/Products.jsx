@@ -123,24 +123,38 @@ function ProductsPage() {
                 discountCode: isDiscountApplied ? discountCode.toUpperCase() : null, // Se envía el código usado
                 lines: cart.map(item => ({
                     sku: item.sku,
+                    productName: item.productName,
                     quantity: item.quantity,
-                    unitPrice: item.price 
+                    unitPrice: item.price
                 }))
             };
 
-            await createOrderRequest(orderData);
+            const order = await createOrderRequest(orderData);
+
+            if (order.status === "REJECTED") {
+                setError(order.reason || "El pedido fue rechazado por falta de stock.");
+                setLoading(false);
+                return;
+            }
+
+            if (order.paymentUrl) {
+                // Salimos de la SPA hacia la pasarela de pago simulada;
+                // el backend nos devolverá a la app una vez confirmado el pago.
+                window.location.href = order.paymentUrl;
+                return;
+            }
 
             setMessage("¡Pedido realizado con éxito!");
-            setCart([]); 
-            setShippingAddress(""); 
+            setCart([]);
+            setShippingAddress("");
             setCustomerName("");
             setCustomerEmail("");
-            
+
             // Reiniciamos los estados del código de descuento
             setDiscountCode("");
             setIsDiscountApplied(false);
 
-            await loadProducts(); 
+            await loadProducts();
             setTimeout(() => setMessage(""), 4000);
         } catch (err) {
             setMessage("");

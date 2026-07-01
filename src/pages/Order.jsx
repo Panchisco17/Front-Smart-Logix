@@ -36,14 +36,16 @@ function OrderPage() {
         switch (status) {
             case 'PENDING': 
                 return <span className="bg-gray-100 text-gray-800 text-xs font-bold px-2.5 py-1 rounded">Pendiente</span>;
-            case 'APPROVED': 
-                return <span className="bg-yellow-100 text-yellow-800 text-xs font-bold px-2.5 py-1 rounded">En Bodega (Aprobado)</span>;
-            case 'SHIPMENT_REQUESTED': 
+            case 'APPROVED':
+                return <span className="bg-yellow-100 text-yellow-800 text-xs font-bold px-2.5 py-1 rounded">Pendiente de Pago</span>;
+            case 'PAID':
+                return <span className="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-1 rounded">Pagado</span>;
+            case 'SHIPMENT_REQUESTED':
                 return <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded">Despachado</span>;
             case 'REJECTED': 
                 return <span className="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded">Rechazado</span>;
-            case 'FAILED': 
-                return <span className="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded">Error de Envío</span>;
+            case 'FAILED':
+                return <span className="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded">Pago Rechazado</span>;
             default: 
                 return <span className="bg-gray-100 text-gray-800 text-xs font-bold px-2.5 py-1 rounded">{status}</span>;
         }
@@ -101,8 +103,8 @@ function OrderPage() {
                                     </td>
                                     <td className="px-6 py-4 flex justify-center items-center min-w-[160px]">
                                         
-                                        {order.status === 'APPROVED' && (
-                                            <button 
+                                        {order.status === 'PAID' && (
+                                            <button
                                                 onClick={() => handleUpdateStatus(order.orderNumber, 'SHIPMENT_REQUESTED')}
                                                 className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded transition shadow-sm w-full"
                                             >
@@ -113,6 +115,12 @@ function OrderPage() {
                                         {order.status === 'PENDING' && (
                                             <span className="text-xs text-gray-500 font-medium italic text-center">
                                                 Validando inventario...
+                                            </span>
+                                        )}
+
+                                        {order.status === 'APPROVED' && (
+                                            <span className="text-xs text-gray-500 font-medium italic text-center">
+                                                Esperando pago del cliente...
                                             </span>
                                         )}
 
@@ -132,8 +140,8 @@ function OrderPage() {
                                         )}
 
                                         {order.status === 'FAILED' && (
-                                            <span className="text-xs text-red-600 font-bold text-center">
-                                                Fallo de Guía
+                                            <span className="text-xs text-red-600 font-bold text-center" title={order.reason}>
+                                                Pago rechazado por el cliente
                                             </span>
                                         )}
 

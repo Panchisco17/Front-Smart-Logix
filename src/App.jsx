@@ -40,10 +40,28 @@ const ROLE_COLORS = {
   "ROLE_USER": "bg-green-600" 
 };
 
+const PAYMENT_NOTICES = {
+  success: { text: "✅ Pago aprobado. Tu pedido fue confirmado.", className: "bg-green-100 text-green-800 border border-green-200" },
+  failed: { text: "❌ Pago rechazado. Tu pedido no pudo completarse.", className: "bg-red-100 text-red-800 border border-red-200" },
+  pending: { text: "⏳ El pago quedó pendiente de confirmación.", className: "bg-yellow-100 text-yellow-800 border border-yellow-200" },
+}
+
 function App() {
   const [isLogin, setIsLogin] = useState(Boolean(getSaveToken()))
   const [isRegistering, setIsRegistering] = useState(false)
-  
+  const [paymentNotice, setPaymentNotice] = useState(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const payment = params.get("payment")
+    if (payment) {
+      setPaymentNotice(payment)
+      const cleanUrl = window.location.pathname + window.location.hash
+      window.history.replaceState({}, "", cleanUrl)
+      setTimeout(() => setPaymentNotice(null), 6000)
+    }
+  }, [])
+
   const currentUser = getSaveUser();
   const displayRole = currentUser ? (ROLE_NAMES[currentUser.role] || currentUser.role) : "";
   const roleColor = currentUser ? (ROLE_COLORS[currentUser.role] || "bg-gray-500") : "bg-gray-500";
@@ -143,6 +161,11 @@ function App() {
         <header className="mb-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-800">{currentLabel}</h1>
         </header>
+        {paymentNotice && PAYMENT_NOTICES[paymentNotice] && (
+          <div className={`mb-6 p-4 rounded-lg font-semibold ${PAYMENT_NOTICES[paymentNotice].className}`}>
+            {PAYMENT_NOTICES[paymentNotice].text}
+          </div>
+        )}
         <main className="bg-transparent rounded-lg">
           {renderPrivate()}
         </main>
