@@ -101,7 +101,7 @@ function OrderPage() {
                                     <td className="px-6 py-4">
                                         {getStatusBadge(order.status)}
                                     </td>
-                                    <td className="px-6 py-4 flex justify-center items-center min-w-[160px]">
+                                    <td className="px-6 py-4 flex justify-center items-center min-w-40">
                                         
                                         {order.status === 'PAID' && (
                                             <button
