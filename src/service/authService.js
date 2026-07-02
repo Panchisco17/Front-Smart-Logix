@@ -1,3 +1,4 @@
+import { jwtDecode } from "jwt-decode"
 import { loginRequest } from "../api/authApi"
 
 export async function login({ credential, password }) {
@@ -36,9 +37,28 @@ export function getSaveToken() {
     return localStorage.getItem("token")
 }
 
+// Importante: username y role se leen del JWT decodificado, NUNCA del objeto
+// "user" guardado en localStorage. Ese objeto es JSON plano editable desde
+// las DevTools del navegador (inspeccionar -> Application -> Local Storage);
+// si confiáramos en él, cualquiera podría cambiar su rol a ROLE_ADMIN sin
+// tocar el token. El JWT en cambio está firmado por el backend: si alguien
+// edita su contenido, la firma deja de ser válida y el backend lo rechaza.
 export function getSaveUser() {
+    const token = getSaveToken()
+    if (!token) {
+        return null
+    }
+
     try {
-        return JSON.parse(localStorage.getItem("user"))
+        const decoded = jwtDecode(token)
+        const stored = JSON.parse(localStorage.getItem("user")) || {}
+
+        return {
+            username: decoded.sub,
+            role: decoded.role,
+            tokenType: stored.tokenType,
+            expiresInMs: stored.expiresInMs
+        }
     } catch {
         return null
     }

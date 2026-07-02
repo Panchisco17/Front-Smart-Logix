@@ -41,3 +41,25 @@ export function getUsersRequest() {
         }
     })
 }
+
+// PATCH Cambia el rol de un usuario (Exclusivo para el ADMIN)
+export function updateUserRoleRequest(id, role) {
+    return httpRequest(`/api/auth/users/${id}/role`, {
+        method: "PATCH",
+        headers: {
+            "Authorization": getRequiredAuthorizationHeader()
+        },
+        body: JSON.stringify({ role })
+    })
+}
+
+// PATCH Habilita o suspende una cuenta (Exclusivo para el ADMIN)
+export function updateUserStatusRequest(id, enabled) {
+    return httpRequest(`/api/auth/users/${id}/status`, {
+        method: "PATCH",
+        headers: {
+            "Authorization": getRequiredAuthorizationHeader()
+        },
+        body: JSON.stringify({ enabled })
+    })
+}
