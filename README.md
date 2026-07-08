@@ -7,34 +7,54 @@ administrativos de inventario, órdenes, envíos, cupones y usuarios.
 
 ## Requisitos
 
-- Node.js 18+ y npm
+- Docker Desktop (forma recomendada de levantar el frontend, ver abajo)
+- Node.js 18+ y npm (solo si se quiere correr en modo desarrollo con hot-reload)
 - El backend (`Back-Smart-Logix`) corriendo, con `api-gateway` expuesto en
   `http://localhost:8080` (ver README de ese repositorio para levantarlo con
-  Docker Compose o de forma manual)
+  `.\run-docker.ps1`)
 
-## Instalación
+## Ejecución (recomendado: Docker)
+
+```powershell
+.\run-frontend.ps1
+```
+
+Esto construye la app (`npm run build`) y la sirve con nginx dentro de un
+contenedor Docker, en `http://localhost` (puerto 80). Es la forma estable de
+probar la plataforma completa: no depende de una ventana de terminal abierta
+ni de un proceso de desarrollo que se pueda caer solo — se comporta igual que
+el resto de los microservicios del backend. El costo es que **no tiene
+hot-reload**: si cambias código, hay que volver a correr `.\run-frontend.ps1`
+para reconstruir la imagen.
+
+Para detenerlo:
+
+```powershell
+docker compose down
+```
+
+## Ejecución (alternativa: modo desarrollo con hot-reload)
+
+Útil solo si estás editando código activamente y quieres ver los cambios al
+instante, sin reconstruir. No se recomienda para simplemente "probar la app".
 
 ```powershell
 npm install
-```
-
-## Ejecución (modo desarrollo)
-
-```powershell
 npm run dev
 ```
 
-La aplicación queda disponible en `http://localhost:5173`. El cliente HTTP
-(`src/api/httpClient.js`) apunta de forma fija a `http://localhost:8080`
-(el `api-gateway`); si el backend corre en otro host/puerto, actualizar
-`API_URL_BASE` en ese archivo.
+La aplicación queda disponible en `http://localhost:5173`. Ten en cuenta que
+`payment-service` (backend) redirige después del pago a la URL configurada en
+`app.frontend.*` de su `application.yml`, que por defecto apunta al frontend
+dockerizado (`http://localhost`, puerto 80) — si pruebas el flujo de pago
+completo en modo desarrollo, exporta las variables de entorno
+`FRONTEND_SUCCESS_URL` / `FRONTEND_FAILURE_URL` / `FRONTEND_PENDING_URL`
+apuntando a `http://localhost:5173/...` antes de levantar `payment-service`,
+o simplemente prueba el pago contra la versión dockerizada.
 
-## Compilar para producción
-
-```powershell
-npm run build
-npm run preview
-```
+El cliente HTTP (`src/api/httpClient.js`) apunta de forma fija a
+`http://localhost:8080` (el `api-gateway`); si el backend corre en otro
+host/puerto, actualizar `API_URL_BASE` en ese archivo.
 
 ## Linter
 
@@ -48,8 +68,9 @@ No hay un backend de pruebas separado: se prueba contra los usuarios
 sembrados (seed) que ya trae `auth-service` al levantar el backend por
 primera vez.
 
-1. Levantar el backend completo (Docker Compose o manual) y luego `npm run dev`.
-2. Ir a `http://localhost:5173` e iniciar sesión con uno de los usuarios seed:
+1. Levantar el backend completo (`.\run-docker.ps1` en `Back-Smart-Logix`) y
+   luego el frontend (`.\run-frontend.ps1` en este repositorio).
+2. Ir a `http://localhost` e iniciar sesión con uno de los usuarios seed:
 
    | Usuario | Password | Rol |
    |---|---|---|

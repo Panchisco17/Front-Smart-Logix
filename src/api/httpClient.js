@@ -24,10 +24,15 @@ export async function httpRequest(path, options = {}) {
         headers["Authorization"] = `${tokenType} ${token}`
     }
 
-    // 4. Hacemos la petición con los encabezados actualizados
+    // 4. Hacemos la petición con los encabezados actualizados.
+    // cache: "no-store" evita que el navegador reutilice una respuesta vieja
+    // cacheada (ej. "Mis Pedidos" visitado antes de pagar) después de volver
+    // de un redirect externo (Transbank) — sin esto, el estado/monto se veía
+    // desactualizado hasta recargar la página a mano.
     const response = await fetch(`${API_URL_BASE}${path}`, {
         ...options,
-        headers
+        headers,
+        cache: "no-store"
     })
 
     const text = await response.text()

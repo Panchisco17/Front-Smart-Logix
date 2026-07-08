@@ -1,11 +1,26 @@
 import { useEffect, useState } from "react";
-import { getOrdersRequest } from "../api/orderApi";
+import { getOrdersRequest, downloadReceiptPdf } from "../api/orderApi";
 import { getSaveUser } from "../service/authService";
+
+const PAID_STATUSES = ["PAID", "SHIPMENT_REQUESTED"];
 
 function MyOrdersPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [downloadingOrder, setDownloadingOrder] = useState(null);
+
+    async function handleDownloadReceipt(orderNumber) {
+        setDownloadingOrder(orderNumber);
+        setError("");
+        try {
+            await downloadReceiptPdf(orderNumber);
+        } catch (err) {
+            setError(err.message || "No se pudo descargar la boleta.");
+        } finally {
+            setDownloadingOrder(null);
+        }
+    }
 
     // Obtenemos los datos del usuario logueado
     const currentUser = getSaveUser();
@@ -121,6 +136,18 @@ function MyOrdersPage() {
                                     )}
                                 </div>
                             </div>
+
+                            {PAID_STATUSES.includes(order.status) && (
+                                <div className="flex justify-end mt-4 pt-4 border-t border-slate-100">
+                                    <button
+                                        onClick={() => handleDownloadReceipt(order.orderNumber)}
+                                        disabled={downloadingOrder === order.orderNumber}
+                                        className="btn-secondary text-sm px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {downloadingOrder === order.orderNumber ? "Generando..." : "📄 Descargar boleta (PDF)"}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
