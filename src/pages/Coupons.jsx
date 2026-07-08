@@ -145,22 +145,22 @@ function CouponsPage() {
     }
 
     if (loading) {
-        return <div className="text-center py-10 text-gray-600">Cargando cupones...</div>;
+        return <div className="text-center py-10 text-slate-600">Cargando cupones...</div>;
     }
 
     return (
         <div className="flex flex-col gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-xl font-bold mb-4 text-gray-800">
+            <div className="bg-white p-6 rounded-xl shadow-sm ring-1 ring-slate-900/5 border border-slate-200">
+                <h2 className="text-xl font-bold mb-4 text-slate-800">
                     {editingId ? `Editar cupón` : "Nuevo cupón"}
                 </h2>
 
-                {error && <div className="mb-4 p-3 rounded bg-red-100 text-red-700">{error}</div>}
-                {message && <div className="mb-4 p-3 rounded bg-green-100 text-green-700">{message}</div>}
+                {error && <div className="mb-4 p-3 rounded bg-rose-100 text-rose-700">{error}</div>}
+                {message && <div className="mb-4 p-3 rounded bg-emerald-100 text-emerald-700">{message}</div>}
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Código</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Código</label>
                         <input
                             type="text"
                             value={form.code}
@@ -171,7 +171,7 @@ function CouponsPage() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Tipo</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Tipo</label>
                         <select
                             value={form.type}
                             onChange={(e) => setForm({ ...form, type: e.target.value })}
@@ -184,7 +184,7 @@ function CouponsPage() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                        <label className="block text-xs font-bold text-slate-700 mb-1">
                             Valor {form.type === "TWO_FOR_ONE" && "(no aplica para 2x1)"}
                         </label>
                         <input
@@ -199,7 +199,7 @@ function CouponsPage() {
                     </div>
 
                     <div className="md:col-span-3">
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Descripción</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Descripción</label>
                         <input
                             type="text"
                             value={form.description}
@@ -210,7 +210,7 @@ function CouponsPage() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Subtotal mínimo ($)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Subtotal mínimo ($)</label>
                         <input
                             type="number"
                             min="0"
@@ -222,7 +222,7 @@ function CouponsPage() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Dominio de correo requerido</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Dominio de correo requerido</label>
                         <input
                             type="text"
                             value={form.requiredEmailDomain}
@@ -233,7 +233,7 @@ function CouponsPage() {
                     </div>
 
                     <div className="flex items-end gap-4">
-                        <label className="flex items-center gap-2 text-sm text-gray-700">
+                        <label className="flex items-center gap-2 text-sm text-slate-700">
                             <input
                                 type="checkbox"
                                 checked={form.firstPurchaseOnly}
@@ -241,7 +241,7 @@ function CouponsPage() {
                             />
                             Solo primera compra
                         </label>
-                        <label className="flex items-center gap-2 text-sm text-gray-700">
+                        <label className="flex items-center gap-2 text-sm text-slate-700">
                             <input
                                 type="checkbox"
                                 checked={form.active}
@@ -252,18 +252,18 @@ function CouponsPage() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Fecha de inicio</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Fecha de inicio</label>
                         <input
                             type="datetime-local"
                             value={form.startDate}
                             onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                             className="w-full p-2 border rounded"
                         />
-                        <p className="text-[11px] text-gray-400 mt-1">Deja vacío para que empiece a regir de inmediato.</p>
+                        <p className="text-[11px] text-slate-400 mt-1">Deja vacío para que empiece a regir de inmediato.</p>
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Duración fija (días)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Duración fija (días)</label>
                         <input
                             type="number"
                             min="0"
@@ -275,34 +275,34 @@ function CouponsPage() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Fecha de término</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Fecha de término</label>
                         <input
                             type="datetime-local"
                             value={form.endDate}
                             onChange={(e) => setForm({ ...form, endDate: e.target.value, durationDays: "" })}
                             className="w-full p-2 border rounded"
                         />
-                        <p className="text-[11px] text-gray-400 mt-1">Deja vacío para que el cupón no venza.</p>
+                        <p className="text-[11px] text-slate-400 mt-1">Deja vacío para que el cupón no venza.</p>
                     </div>
 
                     <div className="md:col-span-3 flex justify-end gap-3 mt-2">
                         {editingId && (
-                            <button type="button" onClick={resetForm} className="px-6 py-2 rounded font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition">
+                            <button type="button" onClick={resetForm} className="px-6 py-2 rounded font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
                                 Cancelar
                             </button>
                         )}
-                        <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition font-bold">
+                        <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded transition font-bold">
                             {editingId ? "Guardar cambios" : "+ Crear cupón"}
                         </button>
                     </div>
                 </form>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-xl font-bold mb-4 text-gray-800">Cupones registrados</h2>
+            <div className="bg-white p-6 rounded-xl shadow-sm ring-1 ring-slate-900/5 border border-slate-200">
+                <h2 className="text-xl font-bold mb-4 text-slate-800">Cupones registrados</h2>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left text-gray-600">
-                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                    <table className="w-full text-sm text-left text-slate-600">
+                        <thead className="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-200">
                             <tr>
                                 <th className="px-4 py-3">Código</th>
                                 <th className="px-4 py-3">Tipo</th>
@@ -313,15 +313,15 @@ function CouponsPage() {
                                 <th className="px-4 py-3 text-center">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-slate-100">
                             {coupons.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" className="text-center py-6 text-gray-500">No hay cupones registrados.</td>
+                                    <td colSpan="7" className="text-center py-6 text-slate-500">No hay cupones registrados.</td>
                                 </tr>
                             ) : (
                                 coupons.map((coupon) => (
-                                    <tr key={coupon.id} className="bg-white hover:bg-gray-50 transition-colors">
-                                        <td className="px-4 py-3 font-bold text-gray-900">{coupon.code}</td>
+                                    <tr key={coupon.id} className="bg-white hover:bg-slate-50 transition-colors">
+                                        <td className="px-4 py-3 font-bold text-slate-900">{coupon.code}</td>
                                         <td className="px-4 py-3">{TYPE_LABELS[coupon.type] || coupon.type}</td>
                                         <td className="px-4 py-3">
                                             {coupon.type === "TWO_FOR_ONE"
@@ -330,13 +330,13 @@ function CouponsPage() {
                                                     ? `${coupon.amount}%`
                                                     : `$${coupon.amount}`}
                                         </td>
-                                        <td className="px-4 py-3 text-xs text-gray-500">
+                                        <td className="px-4 py-3 text-xs text-slate-500">
                                             {coupon.minSubtotal ? <div>Mín: ${coupon.minSubtotal}</div> : null}
                                             {coupon.requiredEmailDomain ? <div>Correo: {coupon.requiredEmailDomain}</div> : null}
                                             {coupon.firstPurchaseOnly ? <div>Solo primera compra</div> : null}
                                             {!coupon.minSubtotal && !coupon.requiredEmailDomain && !coupon.firstPurchaseOnly ? "—" : null}
                                         </td>
-                                        <td className="px-4 py-3 text-xs text-gray-500">
+                                        <td className="px-4 py-3 text-xs text-slate-500">
                                             {coupon.startDate && <div>Desde {new Date(coupon.startDate).toLocaleDateString()}</div>}
                                             {coupon.endDate
                                                 ? <div>Hasta {new Date(coupon.endDate).toLocaleDateString()}</div>
@@ -347,8 +347,8 @@ function CouponsPage() {
                                                 onClick={() => handleToggleActive(coupon)}
                                                 className={`text-xs font-bold px-3 py-1 rounded-full transition ${
                                                     coupon.active
-                                                        ? "bg-green-100 text-green-800 hover:bg-green-200"
-                                                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                                                        ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                                        : "bg-slate-200 text-slate-600 hover:bg-slate-300"
                                                 }`}
                                             >
                                                 {coupon.active ? "Activo" : "Inactivo"}
@@ -356,10 +356,10 @@ function CouponsPage() {
                                         </td>
                                         <td className="px-4 py-3 text-center">
                                             <div className="flex justify-center gap-2">
-                                                <button onClick={() => handleEdit(coupon)} className="text-blue-600 hover:text-blue-800 text-xs font-bold">
+                                                <button onClick={() => handleEdit(coupon)} className="text-indigo-600 hover:text-indigo-800 text-xs font-bold">
                                                     Editar
                                                 </button>
-                                                <button onClick={() => handleDelete(coupon)} className="text-red-600 hover:text-red-800 text-xs font-bold">
+                                                <button onClick={() => handleDelete(coupon)} className="text-rose-600 hover:text-rose-800 text-xs font-bold">
                                                     Eliminar
                                                 </button>
                                             </div>

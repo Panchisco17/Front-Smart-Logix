@@ -98,7 +98,7 @@ function ShipmentsPage() {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <p className="text-gray-600 text-lg">
+                <p className="text-slate-600 text-lg">
                     Cargando envíos...
                 </p>
             </div>
@@ -108,8 +108,8 @@ function ShipmentsPage() {
     return (
         <div className="max-w-6xl mx-auto p-6 space-y-6">
 
-            <div className="bg-white shadow-md rounded-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            <div className="bg-white shadow-md rounded-xl p-6">
+                <h2 className="text-2xl font-bold text-slate-800 mb-4">
                     Gestión de Envíos
                 </h2>
 
@@ -161,7 +161,7 @@ function ShipmentsPage() {
 
                     <button
                         type="submit"
-                        className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded transition"
                     >
                         Agregar Envío
                     </button>
@@ -172,18 +172,18 @@ function ShipmentsPage() {
                 <div
                     className={`p-3 rounded-md text-center ${
                         message.toLowerCase().includes("correctamente")
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-rose-100 text-rose-700"
                     }`}
                 >
                     {message}
                 </div>
             )}
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="bg-white shadow-md rounded-xl overflow-hidden">
 
                 <div className="px-6 py-4 border-b">
-                    <h3 className="font-semibold text-gray-700">
+                    <h3 className="font-semibold text-slate-700">
                         Lista de Envíos
                     </h3>
                 </div>
@@ -191,7 +191,7 @@ function ShipmentsPage() {
                 <div className="overflow-x-auto">
                     <table className="w-full">
 
-                        <thead className="bg-gray-100">
+                        <thead className="bg-slate-100">
                             <tr>
                                 <th className="text-left p-4 font-semibold">
                                     Orden
@@ -212,7 +212,7 @@ function ShipmentsPage() {
                                 <tr>
                                     <td
                                         colSpan="3"
-                                        className="text-center p-6 text-gray-500"
+                                        className="text-center p-6 text-slate-500"
                                     >
                                         No existen envíos registrados.
                                     </td>
@@ -221,14 +221,14 @@ function ShipmentsPage() {
                                 shipments.map((shipment) => (
                                     <tr
                                         key={shipment.trackingCode}
-                                        className="border-t hover:bg-gray-50"
+                                        className="border-t hover:bg-slate-50"
                                     >
                                         <td className="p-4">
                                             {shipment.orderNumber}
                                         </td>
 
                                         <td className="p-4">
-                                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                            <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">
                                                 {
                                                 shipment.status === "PLANNED"
                                                     ? "Planificado"
@@ -251,7 +251,7 @@ function ShipmentsPage() {
                                                             shipment.trackingCode
                                                         )
                                                     }
-                                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md transition"
+                                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-md transition"
                                                 >
                                                     Entregar
                                                 </button>
@@ -263,7 +263,7 @@ function ShipmentsPage() {
                                                         shipment.trackingCode
                                                     )
                                                 }
-                                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md transition"
+                                                className="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1 rounded-md transition"
                                             >
                                                 Eliminar
                                             </button>

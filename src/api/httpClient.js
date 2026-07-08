@@ -34,6 +34,18 @@ export async function httpRequest(path, options = {}) {
     const data = text ? JSON.parse(text) : null
 
     if (!response.ok) {
+        // Si mandamos un token y el backend lo rechaza (401), la sesión expiró
+        // o quedó invalidada (el JWT dura 1 hora). Antes esto hacía que cada
+        // pantalla fallara en silencio con un error genérico ("no se pudieron
+        // cargar los pedidos", etc.) hasta que el usuario cerraba sesión a
+        // mano. Ahora limpiamos la sesión y recargamos para volver al login
+        // apenas se detecta, en vez de dejar la app en un estado confuso.
+        if (response.status === 401 && token) {
+            localStorage.removeItem("token")
+            localStorage.removeItem("user")
+            window.location.reload()
+            return new Promise(() => {})
+        }
         throw new Error(data?.message || "Error en la solicitud al backend")
     }
 

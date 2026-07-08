@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { registerRequest } from "../api/authApi";
+import Logo from "../components/Logo";
 
 function RegisterPage({ onNavigateToLogin }) {
     const [userData, setUserData] = useState({
@@ -9,10 +10,12 @@ function RegisterPage({ onNavigateToLogin }) {
     });
 
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage("");
+        setLoading(true);
 
         try {
             await registerRequest(userData);
@@ -25,95 +28,102 @@ function RegisterPage({ onNavigateToLogin }) {
 
         } catch (err) {
             setMessage(err.message || "No se pudo registrar");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-100">
-            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-                    Crear Cuenta
-                </h2>
+        <div className="min-h-screen flex justify-center items-center bg-slate-100 p-6">
+            <div className="w-full max-w-sm">
+                <div className="flex justify-center mb-8">
+                    <Logo size={40} className="text-slate-800" />
+                </div>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div className="card">
+                    <h2 className="text-2xl font-bold text-slate-800 mb-1 text-center">Crear cuenta</h2>
+                    <p className="text-slate-500 text-sm mb-8 text-center">Regístrate para empezar a comprar</p>
 
-                    <label className="text-sm font-medium text-gray-700">
-                        Usuario
-                        <input
-                            type="text"
-                            value={userData.username}
-                            onChange={(e) =>
-                                setUserData({
-                                    ...userData,
-                                    username: e.target.value
-                                })
-                            }
-                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-                            required
-                        />
-                    </label>
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                        <label className="text-sm font-medium text-slate-700">
+                            Usuario
+                            <input
+                                type="text"
+                                value={userData.username}
+                                onChange={(e) =>
+                                    setUserData({
+                                        ...userData,
+                                        username: e.target.value
+                                    })
+                                }
+                                className="input-field mt-1"
+                                required
+                            />
+                        </label>
 
-                    <label className="text-sm font-medium text-gray-700">
-                        Correo electrónico
-                        <input
-                            type="email"
-                            value={userData.email}
-                            onChange={(e) =>
-                                setUserData({
-                                    ...userData,
-                                    email: e.target.value
-                                })
-                            }
-                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-                            required
-                        />
-                    </label>
+                        <label className="text-sm font-medium text-slate-700">
+                            Correo electrónico
+                            <input
+                                type="email"
+                                value={userData.email}
+                                onChange={(e) =>
+                                    setUserData({
+                                        ...userData,
+                                        email: e.target.value
+                                    })
+                                }
+                                className="input-field mt-1"
+                                required
+                            />
+                        </label>
 
-                    <label className="text-sm font-medium text-gray-700">
-                        Contraseña
-                        <input
-                            type="password"
-                            value={userData.password}
-                            onChange={(e) =>
-                                setUserData({
-                                    ...userData,
-                                    password: e.target.value
-                                })
-                            }
-                            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-                            required
-                        />
-                    </label>
+                        <label className="text-sm font-medium text-slate-700">
+                            Contraseña
+                            <input
+                                type="password"
+                                value={userData.password}
+                                onChange={(e) =>
+                                    setUserData({
+                                        ...userData,
+                                        password: e.target.value
+                                    })
+                                }
+                                className="input-field mt-1"
+                                required
+                            />
+                        </label>
 
-                    <div className="flex gap-2 mt-2">
-                        <button
-                            type="submit"
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition"
-                        >
-                            Registrarse
-                        </button>
+                        <div className="flex gap-2 mt-2">
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="btn-primary flex-1 py-2.5"
+                            >
+                                {loading ? "Creando..." : "Registrarse"}
+                            </button>
 
-                        <button
-                            type="button"
-                            onClick={onNavigateToLogin}
-                            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 rounded-md transition"
-                        >
-                            Volver
-                        </button>
-                    </div>
+                            <button
+                                type="button"
+                                onClick={onNavigateToLogin}
+                                className="btn-secondary flex-1 py-2.5"
+                            >
+                                Volver
+                            </button>
+                        </div>
 
-                    {message && (
-                        <p
-                            className={`text-center text-sm p-2 rounded ${
-                                message.includes("correctamente")
-                                    ? "text-green-700 bg-green-100"
-                                    : "text-red-600 bg-red-100"
-                            }`}
-                        >
-                            {message}
-                        </p>
-                    )}
-                </form>
+                        {message && (
+                            <p
+                                className={`text-center text-sm p-2.5 rounded-xl ${
+                                    message.includes("correctamente")
+                                        ? "text-emerald-700 bg-emerald-50 ring-1 ring-emerald-200"
+                                        : "text-rose-700 bg-rose-50 ring-1 ring-rose-200"
+                                }`}
+                            >
+                                {message}
+                            </p>
+                        )}
+                    </form>
+                </div>
             </div>
         </div>
     );

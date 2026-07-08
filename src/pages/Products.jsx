@@ -222,36 +222,36 @@ function ProductsPage() {
     }
 
     if (loading && products.length === 0) {
-        return <div className="text-center py-10 text-gray-600">Cargando catálogo...</div>;
+        return <div className="text-center py-10 text-slate-600">Cargando catálogo...</div>;
     }
 
     return (
         <div className="flex flex-col lg:flex-row gap-6">
             
-            <div className="flex-1 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-xl font-bold mb-6 text-gray-800">Catálogo de Productos</h2>
+            <div className="flex-1 bg-white p-6 rounded-xl shadow-sm ring-1 ring-slate-900/5 border border-slate-200">
+                <h2 className="text-xl font-bold mb-6 text-slate-800">Catálogo de Productos</h2>
 
-                {error && <div className="mb-4 p-3 rounded bg-red-100 text-red-700">{error}</div>}
-                {message && <div className="mb-4 p-3 rounded bg-green-100 text-green-700">{message}</div>}
+                {error && <div className="mb-4 p-3 rounded bg-rose-100 text-rose-700">{error}</div>}
+                {message && <div className="mb-4 p-3 rounded bg-emerald-100 text-emerald-700">{message}</div>}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {products.length === 0 ? (
-                        <p className="text-gray-500 col-span-full">No hay productos disponibles en este momento.</p>
+                        <p className="text-slate-500 col-span-full">No hay productos disponibles en este momento.</p>
                     ) : (
                         products.map((item) => (
-                            <div key={item.sku} className="border border-gray-200 rounded-lg p-4 flex flex-col justify-between hover:shadow-md transition">
+                            <div key={item.sku} className="border border-slate-200 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition">
                                 <div>
                                     <div className="flex justify-between items-start mb-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">{item.sku}</span>
-                                        <span className="bg-green-100 text-green-800 text-sm font-bold px-2 py-1 rounded">
+                                        <span className="text-xs font-bold text-slate-400 uppercase">{item.sku}</span>
+                                        <span className="bg-emerald-100 text-emerald-800 text-sm font-bold px-2 py-1 rounded">
                                             ${item.price?.toFixed(0)} 
                                         </span>
                                     </div>
-                                    <h3 className="font-bold text-lg text-gray-800 mb-2">{item.productName}</h3>
-                                    <p className="text-sm text-gray-600 mb-4">Stock disponible: <span className="font-bold text-blue-600">{item.availableQuantity}</span></p>
+                                    <h3 className="font-bold text-lg text-slate-800 mb-2">{item.productName}</h3>
+                                    <p className="text-sm text-slate-600 mb-4">Stock disponible: <span className="font-bold text-indigo-600">{item.availableQuantity}</span></p>
                                 </div>
                                 
-                                <button onClick={() => handleAddToCart(item)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition">
+                                <button onClick={() => handleAddToCart(item)} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded transition">
                                     Agregar al Carrito
                                 </button>
                             </div>
@@ -260,31 +260,31 @@ function ProductsPage() {
                 </div>
             </div>
 
-            <div className="w-full lg:w-96 bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200 h-fit sticky top-6">
-                <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">🛒 Mi Carrito</h2>
+            <div className="w-full lg:w-96 bg-slate-50 p-6 rounded-xl shadow-sm ring-1 ring-slate-900/5 border border-slate-200 h-fit sticky top-6">
+                <h2 className="text-xl font-bold mb-4 text-slate-800 flex items-center gap-2">🛒 Mi Carrito</h2>
 
                 {cart.length === 0 ? (
-                    <p className="text-gray-500 text-sm text-center py-6">Tu carrito está vacío.</p>
+                    <p className="text-slate-500 text-sm text-center py-6">Tu carrito está vacío.</p>
                 ) : (
                     <div className="flex flex-col gap-4">
-                        <ul className="divide-y divide-gray-200">
+                        <ul className="divide-y divide-slate-200">
                             {cart.map((item) => (
                                 <li key={item.sku} className="py-3 flex justify-between items-center">
                                     <div className="flex-1">
-                                        <p className="text-sm font-bold text-gray-800 line-clamp-1">{item.productName}</p>
-                                        <p className="text-xs font-semibold text-gray-600">${(item.price * item.quantity).toFixed(0)}</p>
+                                        <p className="text-sm font-bold text-slate-800 line-clamp-1">{item.productName}</p>
+                                        <p className="text-xs font-semibold text-slate-600">${(item.price * item.quantity).toFixed(0)}</p>
                                     </div>
                                     
                                     <div className="flex items-center gap-2 ml-2">
-                                        <button onClick={() => handleRemoveFromCart(item.sku)} className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 font-bold">-</button>
+                                        <button onClick={() => handleRemoveFromCart(item.sku)} className="w-6 h-6 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-200 font-bold">-</button>
                                         <span className="font-bold text-sm w-4 text-center">{item.quantity}</span>
-                                        <button onClick={() => handleAddToCart(item)} className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-200 font-bold">+</button>
+                                        <button onClick={() => handleAddToCart(item)} className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 font-bold">+</button>
                                     </div>
                                 </li>
                             ))}
                         </ul>
 
-                        <div className="border-t border-gray-200 pt-4 mt-2">
+                        <div className="border-t border-slate-200 pt-4 mt-2">
                             
                             {/* --- SECCIÓN NUEVA: INPUT DESCUENTO --- */}
                             <div className="flex gap-2 mb-4">
@@ -293,14 +293,14 @@ function ProductsPage() {
                                     value={discountCode}
                                     onChange={(e) => setDiscountCode(e.target.value)}
                                     placeholder="Ingresa código (Ej: 2X1, DUOC25, SMART5000)"
-                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm uppercase"
+                                    className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:border-indigo-500 text-sm uppercase"
                                     disabled={isDiscountApplied}
                                 />
                                 <button
                                     onClick={handleApplyDiscount}
                                     disabled={isDiscountApplied || !discountCode.trim()}
                                     className={`px-4 py-2 rounded font-bold text-white transition text-sm ${
-                                        isDiscountApplied ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                                        isDiscountApplied ? "bg-slate-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
                                     }`}
                                 >
                                     {isDiscountApplied ? "Aplicado" : "Aplicar"}
@@ -309,84 +309,84 @@ function ProductsPage() {
                             {/* --- FIN SECCIÓN NUEVA --- */}
 
                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-gray-500 text-sm">Artículos:</span>
-                                <span className="font-bold text-gray-700">{cart.reduce((t, i) => t + i.quantity, 0)}</span>
+                                <span className="text-slate-500 text-sm">Artículos:</span>
+                                <span className="font-bold text-slate-700">{cart.reduce((t, i) => t + i.quantity, 0)}</span>
                             </div>
                             
                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-gray-500 text-sm">Subtotal:</span>
-                                <span className="font-bold text-gray-700">${baseSubtotal.toFixed(0)}</span>
+                                <span className="text-slate-500 text-sm">Subtotal:</span>
+                                <span className="font-bold text-slate-700">${baseSubtotal.toFixed(0)}</span>
                             </div>
 
                             {/* --- SECCIÓN NUEVA: MUESTRA EL DESCUENTO SI EXISTE --- */}
                             {discountAmount > 0 && (
-                                <div className="flex justify-between items-center mb-1 text-green-600">
+                                <div className="flex justify-between items-center mb-1 text-emerald-600">
                                     <span className="text-sm font-semibold">Descuento ({discountCode.trim().toUpperCase()}) aplicado:</span>
                                     <span className="font-bold">-${discountAmount.toFixed(0)}</span>
                                 </div>
                             )}
 
                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-gray-500 text-sm">Costo de Envío:</span>
+                                <span className="text-slate-500 text-sm">Costo de Envío:</span>
                                 {shippingCost === 0 ? (
-                                    <span className="font-bold text-green-600 uppercase text-sm">¡Gratis!</span>
+                                    <span className="font-bold text-emerald-600 uppercase text-sm">¡Gratis!</span>
                                 ) : (
-                                    <span className="font-bold text-gray-700">${shippingCost.toFixed(0)}</span>
+                                    <span className="font-bold text-slate-700">${shippingCost.toFixed(0)}</span>
                                 )}
                             </div>
 
                             {cartSubtotal <= 50000 && (
-                                <p className="text-xs text-blue-600 text-right mb-4 mt-1 font-medium">
+                                <p className="text-xs text-indigo-600 text-right mb-4 mt-1 font-medium">
                                     Agrega ${(50000 - cartSubtotal).toFixed(0)} más para envío gratis.
                                 </p>
                             )}
                             
                             {cartSubtotal > 50000 && <div className="mb-4"></div>}
 
-                            <div className="flex justify-between items-center mb-4 border-t border-gray-200 pt-2">
-                                <span className="font-bold text-gray-800 text-lg">Total:</span>
-                                <span className="font-bold text-2xl text-green-600">${cartTotal.toFixed(0)}</span>
+                            <div className="flex justify-between items-center mb-4 border-t border-slate-200 pt-2">
+                                <span className="font-bold text-slate-800 text-lg">Total:</span>
+                                <span className="font-bold text-2xl text-emerald-600">${cartTotal.toFixed(0)}</span>
                             </div>
 
-                            <div className="flex flex-col gap-3 mb-4 border-t border-gray-200 pt-4">
+                            <div className="flex flex-col gap-3 mb-4 border-t border-slate-200 pt-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-1">Nombre Completo</label>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Nombre Completo</label>
                                     <input 
                                         type="text" 
                                         value={customerName}
                                         onChange={(e) => setCustomerName(e.target.value)}
                                         placeholder="Ej: Juan Pérez" 
-                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
+                                        className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:border-indigo-500 text-sm"
                                         required
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-1">Correo Electrónico</label>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico</label>
                                     <input 
                                         type="email" 
                                         value={customerEmail}
                                         onChange={(e) => setCustomerEmail(e.target.value)}
                                         placeholder="Ej: correo@mail.com" 
-                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
+                                        className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:border-indigo-500 text-sm"
                                         required
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-1">Dirección de Envío</label>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Dirección de Envío</label>
                                     <input 
                                         type="text" 
                                         value={shippingAddress}
                                         onChange={(e) => setShippingAddress(e.target.value)}
                                         placeholder="Ej: Concha y Toro 123" 
-                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 text-sm"
+                                        className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:border-indigo-500 text-sm"
                                         required
                                     />
                                 </div>
                             </div>
 
-                            <button disabled={loading} onClick={handleCheckout} className={`w-full py-3 rounded font-bold text-white transition ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}>
+                            <button disabled={loading} onClick={handleCheckout} className={`w-full py-3 rounded font-bold text-white transition ${loading ? "bg-slate-400 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-700"}`}>
                                 {loading ? "Procesando..." : "Realizar Pedido"}
                             </button>
                         </div>

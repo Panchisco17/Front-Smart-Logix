@@ -1,1 +1,51 @@
 @import "tailwindcss";
+
+:root {
+    font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+}
+
+body {
+    background-color: #f4f5fa;
+}
+
+::selection {
+    background-color: #c7d2fe;
+}
+
+/* Scrollbar discreto para el layout con sidebar y tablas internas */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #c7cbe0;
+    border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: #a8adc9;
+}
+
+@layer components {
+    .card {
+        @apply bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 p-6;
+    }
+
+    .btn-primary {
+        @apply bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed;
+    }
+
+    .btn-secondary {
+        @apply bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl transition-colors ring-1 ring-slate-300;
+    }
+
+    .input-field {
+        @apply w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition-shadow focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30;
+    }
+
+    .badge {
+        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    }
+}
